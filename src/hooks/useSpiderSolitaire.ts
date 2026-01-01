@@ -1,20 +1,24 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Card, GameState, Move, DragInfo } from '@/types/game';
+import { Card, GameState, Move, DragInfo, SUITS } from '@/types/game';
 
 const COLUMNS = 10;
 const MAX_UNDO = 5;
 
-const createDeck = (): Card[] => {
+const createDeck = (suitCount: 1 | 2 | 4): Card[] => {
   const deck: Card[] = [];
-  // 8 complete sets of Ace through King (104 cards total)
-  for (let set = 0; set < 8; set++) {
-    for (let rank = 1; rank <= 13; rank++) {
-      deck.push({
-        id: `${set}-${rank}`,
-        rank,
-        suit: 'spades',
-        isFaceUp: false,
-      });
+  const suitsToUse = SUITS.slice(0, suitCount);
+  const setsPerSuit = 8 / suitCount;
+  
+  for (let set = 0; set < setsPerSuit; set++) {
+    for (const suit of suitsToUse) {
+      for (let rank = 1; rank <= 13; rank++) {
+        deck.push({
+          id: `${suit}-${set}-${rank}`,
+          rank,
+          suit,
+          isFaceUp: false,
+        });
+      }
     }
   }
   return deck;
@@ -33,13 +37,10 @@ const dealCards = (deck: Card[]): { tableau: Card[][]; stock: Card[] } => {
   const tableau: Card[][] = Array.from({ length: COLUMNS }, () => []);
   let cardIndex = 0;
 
-  // Deal cards to tableau
-  // First 4 columns get 6 cards, rest get 5
   for (let col = 0; col < COLUMNS; col++) {
     const cardCount = col < 4 ? 6 : 5;
     for (let i = 0; i < cardCount; i++) {
       const card = { ...deck[cardIndex] };
-      // Only the top card is face up
       if (i === cardCount - 1) {
         card.isFaceUp = true;
       }
@@ -48,21 +49,26 @@ const dealCards = (deck: Card[]): { tableau: Card[][]; stock: Card[] } => {
     }
   }
 
-  // Remaining 50 cards go to stock
   const stock = deck.slice(cardIndex);
-
   return { tableau, stock };
 };
 
-const checkForCompleteSequence = (column: Card[]): { hasComplete: boolean; startIndex: number } => {
+const checkForCompleteSequence = (column: Card[], suitCount: 1 | 2 | 4): { hasComplete: boolean; startIndex: number } => {
   if (column.length < 13) return { hasComplete: false, startIndex: -1 };
 
-  // Look for a complete King to Ace sequence at the bottom of the column
   for (let startIndex = column.length - 13; startIndex >= 0; startIndex--) {
     let isComplete = true;
+    const targetSuit = column[startIndex].suit;
+    
     for (let i = 0; i < 13; i++) {
       const card = column[startIndex + i];
+      const mustMatchSuit = suitCount > 1;
+      
       if (!card.isFaceUp || card.rank !== 13 - i) {
+        isComplete = false;
+        break;
+      }
+      if (mustMatchSuit && card.suit !== targetSuit) {
         isComplete = false;
         break;
       }
@@ -75,7 +81,7 @@ const checkForCompleteSequence = (column: Card[]): { hasComplete: boolean; start
   return { hasComplete: false, startIndex: -1 };
 };
 
-const isValidMove = (cards: Card[], targetColumn: Card[]): boolean => {
+const isValidMove = (cards: Card[], targetColumn: Card[], suitCount: 1 | 2 | 4): boolean => {
   if (targetColumn.length === 0) return true;
   
   const topCard = targetColumn[targetColumn.length - 1];
@@ -84,30 +90,33 @@ const isValidMove = (cards: Card[], targetColumn: Card[]): boolean => {
   return topCard.rank === movingCard.rank + 1;
 };
 
-const canMoveSequence = (column: Card[], fromIndex: number): boolean => {
-  // Check if cards from fromIndex to end form a valid descending sequence
+const canMoveSequence = (column: Card[], fromIndex: number, suitCount: 1 | 2 | 4): boolean => {
+  if (!column[fromIndex].isFaceUp) return false;
+  
   for (let i = fromIndex; i < column.length - 1; i++) {
     if (!column[i].isFaceUp) return false;
     if (column[i].rank !== column[i + 1].rank + 1) return false;
+    // For multi-suit, sequences must be same suit to move together
+    if (suitCount > 1 && column[i].suit !== column[i + 1].suit) return false;
   }
-  return column[fromIndex].isFaceUp;
+  return true;
 };
 
 const STORAGE_KEY = 'spider-solitaire-game';
 
-export const useSpiderSolitaire = () => {
+export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
   const [gameState, setGameState] = useState<GameState>(() => {
-    // Try to load from localStorage
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed.suitCount) return parsed;
       } catch {
-        // If parsing fails, start new game
+        // Start new game
       }
     }
     
-    const deck = shuffleDeck(createDeck());
+    const deck = shuffleDeck(createDeck(initialSuitCount));
     const { tableau, stock } = dealCards(deck);
     return {
       tableau,
@@ -115,16 +124,16 @@ export const useSpiderSolitaire = () => {
       completedSequences: 0,
       moves: [],
       isWon: false,
+      suitCount: initialSuitCount,
     };
   });
 
-  // Save to localStorage whenever game state changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
   }, [gameState]);
 
-  const newGame = useCallback(() => {
-    const deck = shuffleDeck(createDeck());
+  const newGame = useCallback((suitCount: 1 | 2 | 4 = gameState.suitCount) => {
+    const deck = shuffleDeck(createDeck(suitCount));
     const { tableau, stock } = dealCards(deck);
     setGameState({
       tableau,
@@ -132,25 +141,22 @@ export const useSpiderSolitaire = () => {
       completedSequences: 0,
       moves: [],
       isWon: false,
+      suitCount,
     });
-  }, []);
+  }, [gameState.suitCount]);
 
   const moveCards = useCallback((dragInfo: DragInfo, toColumn: number) => {
     setGameState(prev => {
       const { fromColumn, fromIndex, cards } = dragInfo;
       
       if (fromColumn === toColumn) return prev;
-      if (!isValidMove(cards, prev.tableau[toColumn])) return prev;
+      if (!isValidMove(cards, prev.tableau[toColumn], prev.suitCount)) return prev;
 
       const newTableau = prev.tableau.map(col => [...col]);
       
-      // Remove cards from source column
       const removedCards = newTableau[fromColumn].splice(fromIndex);
-      
-      // Add cards to target column
       newTableau[toColumn].push(...removedCards);
 
-      // Flip the new top card if needed
       let flippedCard: Move['flippedCard'] = undefined;
       if (newTableau[fromColumn].length > 0) {
         const topCard = newTableau[fromColumn][newTableau[fromColumn].length - 1];
@@ -163,15 +169,13 @@ export const useSpiderSolitaire = () => {
         }
       }
 
-      // Check for complete sequence
-      const { hasComplete, startIndex } = checkForCompleteSequence(newTableau[toColumn]);
+      const { hasComplete, startIndex } = checkForCompleteSequence(newTableau[toColumn], prev.suitCount);
       let newCompletedSequences = prev.completedSequences;
       
       if (hasComplete) {
         newTableau[toColumn].splice(startIndex, 13);
         newCompletedSequences++;
         
-        // Flip new top card after removing sequence
         if (newTableau[toColumn].length > 0) {
           const topCard = newTableau[toColumn][newTableau[toColumn].length - 1];
           if (!topCard.isFaceUp) {
@@ -205,23 +209,20 @@ export const useSpiderSolitaire = () => {
     setGameState(prev => {
       if (prev.stock.length === 0) return prev;
       
-      // Check if any column is empty
       const hasEmptyColumn = prev.tableau.some(col => col.length === 0);
-      if (hasEmptyColumn) return prev; // Can't deal with empty columns
+      if (hasEmptyColumn) return prev;
 
       const newTableau = prev.tableau.map(col => [...col]);
       const newStock = [...prev.stock];
 
-      // Deal one card to each column
       for (let i = 0; i < COLUMNS && newStock.length > 0; i++) {
         const card = { ...newStock.pop()!, isFaceUp: true };
         newTableau[i].push(card);
       }
 
-      // Check for complete sequences after dealing
       let newCompletedSequences = prev.completedSequences;
       for (let col = 0; col < COLUMNS; col++) {
-        const { hasComplete, startIndex } = checkForCompleteSequence(newTableau[col]);
+        const { hasComplete, startIndex } = checkForCompleteSequence(newTableau[col], prev.suitCount);
         if (hasComplete) {
           newTableau[col].splice(startIndex, 13);
           newCompletedSequences++;
@@ -280,15 +281,15 @@ export const useSpiderSolitaire = () => {
   }, []);
 
   const canDragFrom = useCallback((column: number, cardIndex: number): boolean => {
-    return canMoveSequence(gameState.tableau[column], cardIndex);
-  }, [gameState.tableau]);
+    return canMoveSequence(gameState.tableau[column], cardIndex, gameState.suitCount);
+  }, [gameState.tableau, gameState.suitCount]);
 
   const getValidDropTargets = useCallback((cards: Card[]): number[] => {
     return gameState.tableau
       .map((col, index) => ({ col, index }))
-      .filter(({ col }) => isValidMove(cards, col))
+      .filter(({ col }) => isValidMove(cards, col, gameState.suitCount))
       .map(({ index }) => index);
-  }, [gameState.tableau]);
+  }, [gameState.tableau, gameState.suitCount]);
 
   const hasEmptyColumn = gameState.tableau.some(col => col.length === 0);
 
