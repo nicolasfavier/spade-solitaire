@@ -20,7 +20,15 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   onCardClick,
   onEmptyClick,
 }) => {
-  const cardOverlap = cards.length > 10 ? 16 : cards.length > 8 ? 20 : cards.length > 6 ? 24 : 28;
+  // Overlap adaptatif pour toujours voir le rang des cartes (minimum 22px pour voir le chiffre)
+  const getCardOverlap = () => {
+    if (cards.length <= 5) return 28;
+    if (cards.length <= 7) return 24;
+    if (cards.length <= 10) return 22;
+    if (cards.length <= 13) return 20;
+    return 18; // minimum pour voir les chiffres
+  };
+  const cardOverlap = getCardOverlap();
   
   const isCardSelected = (cardIndex: number) => {
     if (!selectedInfo) return false;

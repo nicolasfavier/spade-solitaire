@@ -109,12 +109,12 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       style={style}
     >
       <div className={cn(
-        "absolute inset-0 p-1.5 sm:p-2 flex flex-col",
+        "absolute inset-0 p-1 sm:p-1.5 flex flex-col",
         isRed ? "text-red-600" : "text-card-foreground"
       )}>
-        {/* Top left rank/suit */}
-        <div className="flex flex-col items-center leading-none">
-          <span className="text-sm sm:text-lg font-bold">{rankDisplay}</span>
+        {/* Top left rank/suit - plus grand et visible */}
+        <div className="flex items-center gap-0.5 leading-none bg-card/90 rounded px-0.5">
+          <span className="text-base sm:text-xl font-black drop-shadow-sm">{rankDisplay}</span>
           <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4 sm:h-4" />
         </div>
 
@@ -124,8 +124,8 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
         </div>
 
         {/* Bottom right rank/suit (rotated) */}
-        <div className="flex flex-col items-center leading-none rotate-180">
-          <span className="text-sm sm:text-lg font-bold">{rankDisplay}</span>
+        <div className="flex items-center gap-0.5 leading-none rotate-180 bg-card/90 rounded px-0.5">
+          <span className="text-base sm:text-xl font-black drop-shadow-sm">{rankDisplay}</span>
           <SuitIcon suit={card.suit} className="w-3 h-3 sm:w-4 sm:h-4" />
         </div>
       </div>
