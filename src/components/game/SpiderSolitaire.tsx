@@ -6,8 +6,14 @@ import { CompletedSequences } from './CompletedSequences';
 import { GameControls } from './GameControls';
 import { VictoryOverlay } from './VictoryOverlay';
 import { SuitSelector } from './SuitSelector';
+import { WelcomeScreen } from './WelcomeScreen';
 
 export const SpiderSolitaire: React.FC = () => {
+  const [showWelcome, setShowWelcome] = useState(() => {
+    // Show welcome if no saved game
+    return !localStorage.getItem('spider-solitaire-game');
+  });
+
   const {
     gameState,
     newGame,
@@ -92,7 +98,17 @@ export const SpiderSolitaire: React.FC = () => {
     setValidTargets([]);
   }, [newGame]);
 
+  const handleWelcomeStart = useCallback(() => {
+    setShowWelcome(false);
+    setShowSuitSelector(true);
+  }, []);
+
   const remainingDeals = Math.floor(gameState.stock.length / 10);
+
+  // Show welcome screen
+  if (showWelcome) {
+    return <WelcomeScreen onStart={handleWelcomeStart} />;
+  }
 
   return (
     <div 
