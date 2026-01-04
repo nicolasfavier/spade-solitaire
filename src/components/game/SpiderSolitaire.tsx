@@ -22,6 +22,7 @@ export const SpiderSolitaire: React.FC = () => {
     undo,
     canDragFrom,
     getValidDropTargets,
+    getHint,
     canUndo,
     canDeal,
     hasEmptyColumn,
@@ -30,8 +31,12 @@ export const SpiderSolitaire: React.FC = () => {
   const [selectedInfo, setSelectedInfo] = useState<{ column: number; index: number } | null>(null);
   const [validTargets, setValidTargets] = useState<number[]>([]);
   const [showSuitSelector, setShowSuitSelector] = useState(false);
+  const [hintInfo, setHintInfo] = useState<{ fromColumn: number; fromIndex: number; toColumn: number } | null>(null);
 
   const handleCardClick = useCallback((columnIndex: number, cardIndex: number) => {
+    // Clear hint when clicking
+    setHintInfo(null);
+    
     // If clicking on a selected card, deselect
     if (selectedInfo && selectedInfo.column === columnIndex && selectedInfo.index === cardIndex) {
       setSelectedInfo(null);
@@ -68,6 +73,7 @@ export const SpiderSolitaire: React.FC = () => {
   }, [selectedInfo, validTargets, gameState.tableau, canDragFrom, getValidDropTargets, moveCards]);
 
   const handleEmptyColumnClick = useCallback((columnIndex: number) => {
+    setHintInfo(null);
     if (selectedInfo && validTargets.includes(columnIndex)) {
       const cards = gameState.tableau[selectedInfo.column].slice(selectedInfo.index);
       moveCards({
@@ -85,9 +91,11 @@ export const SpiderSolitaire: React.FC = () => {
       setSelectedInfo(null);
       setValidTargets([]);
     }
+    setHintInfo(null);
   }, [selectedInfo]);
 
   const handleNewGame = useCallback(() => {
+    setHintInfo(null);
     setShowSuitSelector(true);
   }, []);
 
@@ -96,7 +104,20 @@ export const SpiderSolitaire: React.FC = () => {
     setShowSuitSelector(false);
     setSelectedInfo(null);
     setValidTargets([]);
+    setHintInfo(null);
   }, [newGame]);
+
+  const handleHint = useCallback(() => {
+    const hint = getHint();
+    setHintInfo(hint);
+    setSelectedInfo(null);
+    setValidTargets([]);
+    
+    // Auto-clear hint after 3 seconds
+    if (hint) {
+      setTimeout(() => setHintInfo(null), 3000);
+    }
+  }, [getHint]);
 
   const handleWelcomeStart = useCallback(() => {
     setShowWelcome(false);
@@ -128,7 +149,9 @@ export const SpiderSolitaire: React.FC = () => {
         <GameControls
           onNewGame={handleNewGame}
           onUndo={undo}
+          onHint={handleHint}
           canUndo={canUndo}
+          hasHint={getHint() !== null}
         />
       </header>
 
@@ -146,6 +169,7 @@ export const SpiderSolitaire: React.FC = () => {
               columnIndex={index}
               isValidTarget={validTargets.includes(index)}
               selectedInfo={selectedInfo}
+              hintInfo={hintInfo}
               onCardClick={handleCardClick}
               onEmptyClick={() => handleEmptyColumnClick(index)}
             />

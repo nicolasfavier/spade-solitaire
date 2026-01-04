@@ -8,6 +8,7 @@ interface TableauColumnProps {
   columnIndex: number;
   isValidTarget: boolean;
   selectedInfo: { column: number; index: number } | null;
+  hintInfo?: { fromColumn: number; fromIndex: number; toColumn: number } | null;
   onCardClick: (columnIndex: number, cardIndex: number) => void;
   onEmptyClick: () => void;
 }
@@ -17,16 +18,17 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   columnIndex,
   isValidTarget,
   selectedInfo,
+  hintInfo,
   onCardClick,
   onEmptyClick,
 }) => {
-  // Overlap adaptatif pour toujours voir le rang des cartes (minimum 22px pour voir le chiffre)
+  // Overlap adaptatif pour toujours voir le rang des cartes
   const getCardOverlap = () => {
     if (cards.length <= 5) return 28;
     if (cards.length <= 7) return 24;
     if (cards.length <= 10) return 22;
     if (cards.length <= 13) return 20;
-    return 18; // minimum pour voir les chiffres
+    return 18;
   };
   const cardOverlap = getCardOverlap();
   
@@ -35,12 +37,27 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     return selectedInfo.column === columnIndex && cardIndex >= selectedInfo.index;
   };
 
+  const isHinted = (cardIndex: number) => {
+    if (!hintInfo) return false;
+    return hintInfo.fromColumn === columnIndex && cardIndex >= hintInfo.fromIndex;
+  };
+
+  const isHintTarget = hintInfo && hintInfo.toColumn === columnIndex;
+
+  // Calculate offset for cards below selection
+  const getCardOffset = (cardIndex: number) => {
+    if (!selectedInfo || selectedInfo.column !== columnIndex) return 0;
+    if (cardIndex < selectedInfo.index) return -8; // Push cards below down a bit less, push selected up
+    return 0;
+  };
+
   return (
     <div
       className={cn(
         "relative flex-1 min-w-0",
         "rounded-lg transition-all duration-200",
         isValidTarget && "bg-gold/20",
+        isHintTarget && "bg-success/20",
       )}
     >
       {cards.length === 0 ? (
@@ -51,6 +68,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             "border-2 border-dashed border-muted-foreground/30",
             "bg-muted/10 transition-all",
             isValidTarget && "border-gold bg-gold/10 scale-105",
+            isHintTarget && "border-success bg-success/10 animate-pulse",
           )}
         />
       ) : (
@@ -61,23 +79,28 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             const isInSelectedSequence = selectedInfo && 
               selectedInfo.column === columnIndex && 
               index >= selectedInfo.index;
+            const cardIsHinted = isHinted(index);
+            const offset = getCardOffset(index);
 
             return (
               <div
                 key={card.id}
                 className={cn(
-                  "absolute left-0 right-0",
+                  "absolute left-0 right-0 transition-all duration-200",
                   isInSelectedSequence && "z-30",
+                  cardIsHinted && "z-20",
                 )}
                 style={{
-                  top: `${index * cardOverlap}px`,
-                  zIndex: isInSelectedSequence ? 30 + index : index,
+                  top: `${index * cardOverlap + offset}px`,
+                  zIndex: isInSelectedSequence ? 30 + index : (cardIsHinted ? 20 + index : index),
+                  transform: isInSelectedSequence ? 'translateY(-12px)' : undefined,
                 }}
               >
                 <PlayingCard
                   card={card}
                   isTop={isTop}
                   isSelected={isSelected}
+                  isHinted={cardIsHinted}
                   isValidTarget={isTop && isValidTarget && !selectedInfo}
                   onClick={() => card.isFaceUp && onCardClick(columnIndex, index)}
                 />
