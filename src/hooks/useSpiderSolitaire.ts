@@ -148,7 +148,9 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     });
   }, [gameState.suitCount]);
 
-  const moveCards = useCallback((dragInfo: DragInfo, toColumn: number) => {
+  const moveCards = useCallback((dragInfo: DragInfo, toColumn: number): number | null => {
+    let completedColumn: number | null = null;
+    
     setGameState(prev => {
       const { fromColumn, fromIndex, cards } = dragInfo;
       
@@ -178,6 +180,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
       if (hasComplete) {
         newTableau[toColumn].splice(startIndex, 13);
         newCompletedSequences++;
+        completedColumn = toColumn;
         
         if (newTableau[toColumn].length > 0) {
           const topCard = newTableau[toColumn][newTableau[toColumn].length - 1];
@@ -206,9 +209,13 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         isWon: newCompletedSequences === 8,
       };
     });
+    
+    return completedColumn;
   }, []);
 
-  const dealFromStock = useCallback(() => {
+  const dealFromStock = useCallback((): number[] => {
+    let completedColumns: number[] = [];
+    
     setGameState(prev => {
       if (prev.stock.length === 0) return prev;
       
@@ -229,6 +236,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         if (hasComplete) {
           newTableau[col].splice(startIndex, 13);
           newCompletedSequences++;
+          completedColumns.push(col);
           
           if (newTableau[col].length > 0) {
             const topCard = newTableau[col][newTableau[col].length - 1];
@@ -258,6 +266,8 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         isWon: newCompletedSequences === 8,
       };
     });
+    
+    return completedColumns;
   }, []);
 
   const undo = useCallback(() => {

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, DragInfo } from '@/types/game';
 import { PlayingCard } from './PlayingCard';
+import { ColumnFirework } from './ColumnFirework';
 import { cn } from '@/lib/utils';
 
 interface TableauColumnProps {
@@ -9,8 +10,10 @@ interface TableauColumnProps {
   isValidTarget: boolean;
   selectedInfo: { column: number; index: number } | null;
   hintInfo?: { fromColumn: number; fromIndex: number; toColumn: number } | null;
+  showFirework?: boolean;
   onCardClick: (columnIndex: number, cardIndex: number) => void;
   onEmptyClick: () => void;
+  onFireworkComplete?: () => void;
 }
 
 export const TableauColumn: React.FC<TableauColumnProps> = ({
@@ -19,18 +22,37 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   isValidTarget,
   selectedInfo,
   hintInfo,
+  showFirework = false,
   onCardClick,
   onEmptyClick,
+  onFireworkComplete,
 }) => {
-  // Overlap adaptatif pour toujours voir le rang des cartes
-  const getCardOverlap = () => {
-    if (cards.length <= 5) return 28;
-    if (cards.length <= 7) return 24;
-    if (cards.length <= 10) return 22;
-    if (cards.length <= 13) return 20;
+  // Adaptive overlap - more space for face-down cards to see rank of face-up cards
+  const getCardOverlap = (card: Card, index: number, totalCards: number) => {
+    const isFaceUp = card.isFaceUp;
+    
+    // Face-down cards get minimal overlap (8-12px) to save space
+    // Face-up cards get more overlap (20-28px) to show rank clearly
+    if (!isFaceUp) {
+      return 10; // Minimal overlap for face-down cards
+    }
+    
+    // Face-up cards need more space to show ranks
+    const faceUpCount = cards.filter(c => c.isFaceUp).length;
+    if (faceUpCount <= 5) return 28;
+    if (faceUpCount <= 8) return 24;
+    if (faceUpCount <= 12) return 20;
     return 18;
   };
-  const cardOverlap = getCardOverlap();
+
+  // Calculate cumulative top position for each card
+  const getCardTop = (cardIndex: number): number => {
+    let top = 0;
+    for (let i = 0; i < cardIndex; i++) {
+      top += getCardOverlap(cards[i], i, cards.length);
+    }
+    return top;
+  };
   
   const isCardSelected = (cardIndex: number) => {
     if (!selectedInfo) return false;
@@ -52,6 +74,15 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     return 0;
   };
 
+  const handleFireworkComplete = useCallback(() => {
+    onFireworkComplete?.();
+  }, [onFireworkComplete]);
+
+  // Calculate total height needed
+  const totalHeight = cards.length > 0 
+    ? getCardTop(cards.length - 1) + 56 
+    : 0;
+
   return (
     <div
       className={cn(
@@ -61,6 +92,8 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
         isHintTarget && "bg-success/20",
       )}
     >
+      <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
+      
       {cards.length === 0 ? (
         <div 
           onClick={onEmptyClick}
@@ -73,7 +106,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
           )}
         />
       ) : (
-        <div className="relative" style={{ paddingBottom: `${(cards.length - 1) * cardOverlap + 56}px` }}>
+        <div className="relative" style={{ paddingBottom: `${totalHeight}px` }}>
           {cards.map((card, index) => {
             const isTop = index === cards.length - 1;
             const isSelected = isCardSelected(index);
@@ -82,6 +115,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
               index >= selectedInfo.index;
             const cardIsHinted = isHinted(index);
             const offset = getCardOffset(index);
+            const top = getCardTop(index);
 
             return (
               <div
@@ -92,7 +126,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
                   cardIsHinted && "z-20",
                 )}
                 style={{
-                  top: `${index * cardOverlap + offset}px`,
+                  top: `${top + offset}px`,
                   zIndex: isInSelectedSequence ? 30 + index : (cardIsHinted ? 20 + index : index),
                   transform: isInSelectedSequence ? 'scale(1.05)' : undefined,
                 }}

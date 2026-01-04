@@ -32,9 +32,22 @@ export const SpiderSolitaire: React.FC = () => {
   const [validTargets, setValidTargets] = useState<number[]>([]);
   const [showSuitSelector, setShowSuitSelector] = useState(false);
   const [hintInfo, setHintInfo] = useState<{ fromColumn: number; fromIndex: number; toColumn: number } | null>(null);
+  const [fireworkColumns, setFireworkColumns] = useState<Set<number>>(new Set());
 
   // Memoize hasHint to avoid recalculating on every render
   const hasHint = useMemo(() => getHint() !== null, [getHint]);
+
+  const triggerFirework = useCallback((columnIndex: number) => {
+    setFireworkColumns(prev => new Set([...prev, columnIndex]));
+  }, []);
+
+  const handleFireworkComplete = useCallback((columnIndex: number) => {
+    setFireworkColumns(prev => {
+      const next = new Set(prev);
+      next.delete(columnIndex);
+      return next;
+    });
+  }, []);
 
   const handleCardClick = useCallback((columnIndex: number, cardIndex: number) => {
     // Clear hint when clicking
@@ -52,11 +65,17 @@ export const SpiderSolitaire: React.FC = () => {
       // Check if clicking on a valid target
       if (validTargets.includes(columnIndex)) {
         const cards = gameState.tableau[selectedInfo.column].slice(selectedInfo.index);
-        moveCards({
+        const completedColumn = moveCards({
           cards,
           fromColumn: selectedInfo.column,
           fromIndex: selectedInfo.index,
         }, columnIndex);
+        
+        // Trigger firework if a sequence was completed
+        if (completedColumn !== null) {
+          triggerFirework(completedColumn);
+        }
+        
         setSelectedInfo(null);
         setValidTargets([]);
         return;
@@ -73,7 +92,7 @@ export const SpiderSolitaire: React.FC = () => {
       setSelectedInfo({ column: columnIndex, index: cardIndex });
       setValidTargets(getValidDropTargets(cards));
     }
-  }, [selectedInfo, validTargets, gameState.tableau, canDragFrom, getValidDropTargets, moveCards]);
+  }, [selectedInfo, validTargets, gameState.tableau, canDragFrom, getValidDropTargets, moveCards, triggerFirework]);
 
   const handleEmptyColumnClick = useCallback((columnIndex: number) => {
     setHintInfo(null);
@@ -88,6 +107,11 @@ export const SpiderSolitaire: React.FC = () => {
       setValidTargets([]);
     }
   }, [selectedInfo, validTargets, gameState.tableau, moveCards]);
+
+  const handleDeal = useCallback(() => {
+    const completedColumns = dealFromStock();
+    completedColumns.forEach(col => triggerFirework(col));
+  }, [dealFromStock, triggerFirework]);
 
   const handleBackgroundClick = useCallback(() => {
     if (selectedInfo) {
@@ -181,8 +205,10 @@ export const SpiderSolitaire: React.FC = () => {
               isValidTarget={validTargets.includes(index)}
               selectedInfo={selectedInfo}
               hintInfo={hintInfo}
+              showFirework={fireworkColumns.has(index)}
               onCardClick={handleCardClick}
               onEmptyClick={() => handleEmptyColumnClick(index)}
+              onFireworkComplete={() => handleFireworkComplete(index)}
             />
           ))}
         </div>
@@ -193,7 +219,7 @@ export const SpiderSolitaire: React.FC = () => {
             remainingDeals={remainingDeals}
             canDeal={canDeal}
             hasEmptyColumn={hasEmptyColumn}
-            onDeal={dealFromStock}
+            onDeal={handleDeal}
           />
           
           <CompletedSequences count={gameState.completedSequences} />
