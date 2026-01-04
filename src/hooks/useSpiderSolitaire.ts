@@ -293,6 +293,39 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
 
   const hasEmptyColumn = gameState.tableau.some(col => col.length === 0);
 
+  const getHint = useCallback((): { fromColumn: number; fromIndex: number; toColumn: number } | null => {
+    const { tableau, suitCount } = gameState;
+    
+    // Find a valid move
+    for (let fromCol = 0; fromCol < COLUMNS; fromCol++) {
+      const column = tableau[fromCol];
+      for (let fromIdx = column.length - 1; fromIdx >= 0; fromIdx--) {
+        if (!canMoveSequence(column, fromIdx, suitCount)) continue;
+        
+        const cards = column.slice(fromIdx);
+        
+        // Find a valid target (prefer non-empty columns for better moves)
+        for (let toCol = 0; toCol < COLUMNS; toCol++) {
+          if (toCol === fromCol) continue;
+          if (tableau[toCol].length === 0) continue; // Skip empty for now
+          if (isValidMove(cards, tableau[toCol], suitCount)) {
+            return { fromColumn: fromCol, fromIndex: fromIdx, toColumn: toCol };
+          }
+        }
+        
+        // Then try empty columns
+        for (let toCol = 0; toCol < COLUMNS; toCol++) {
+          if (toCol === fromCol) continue;
+          if (tableau[toCol].length === 0) {
+            return { fromColumn: fromCol, fromIndex: fromIdx, toColumn: toCol };
+          }
+        }
+      }
+    }
+    
+    return null;
+  }, [gameState]);
+
   return {
     gameState,
     newGame,
@@ -301,6 +334,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     undo,
     canDragFrom,
     getValidDropTargets,
+    getHint,
     canUndo: gameState.moves.length > 0,
     canDeal: gameState.stock.length > 0 && !hasEmptyColumn,
     hasEmptyColumn,

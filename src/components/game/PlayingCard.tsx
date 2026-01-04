@@ -8,6 +8,7 @@ interface PlayingCardProps {
   isDragging?: boolean;
   isValidTarget?: boolean;
   isSelected?: boolean;
+  isHinted?: boolean;
   style?: React.CSSProperties;
   onClick?: () => void;
 }
@@ -54,6 +55,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   isDragging = false,
   isValidTarget = false,
   isSelected = false,
+  isHinted = false,
   style,
   onClick,
 }) => {
@@ -103,6 +105,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
         "transition-all duration-150",
         isDragging && "opacity-50",
         isSelected && "ring-3 ring-gold scale-105 z-20 card-shadow-hover",
+        isHinted && "ring-3 ring-success animate-pulse",
         isValidTarget && "ring-2 ring-gold/70",
         isTop && !isSelected && "cursor-pointer hover:translate-y-[-2px] hover:card-shadow-hover",
       )}
