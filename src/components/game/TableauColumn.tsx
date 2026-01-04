@@ -44,10 +44,11 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
 
   const isHintTarget = hintInfo && hintInfo.toColumn === columnIndex;
 
-  // Calculate offset for cards below selection
+  // Calculate offset for cards ABOVE selection (they move down to reveal selected card)
   const getCardOffset = (cardIndex: number) => {
     if (!selectedInfo || selectedInfo.column !== columnIndex) return 0;
-    if (cardIndex < selectedInfo.index) return -8; // Push cards below down a bit less, push selected up
+    // Cards ABOVE the selected sequence should move DOWN
+    if (cardIndex > selectedInfo.index) return 12;
     return 0;
   };
 
@@ -93,7 +94,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
                 style={{
                   top: `${index * cardOverlap + offset}px`,
                   zIndex: isInSelectedSequence ? 30 + index : (cardIsHinted ? 20 + index : index),
-                  transform: isInSelectedSequence ? 'translateY(-12px)' : undefined,
+                  transform: isInSelectedSequence ? 'scale(1.05)' : undefined,
                 }}
               >
                 <PlayingCard

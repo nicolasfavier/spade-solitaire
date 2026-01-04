@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useSpiderSolitaire } from '@/hooks/useSpiderSolitaire';
 import { TableauColumn } from './TableauColumn';
 import { StockPile } from './StockPile';
@@ -32,6 +32,9 @@ export const SpiderSolitaire: React.FC = () => {
   const [validTargets, setValidTargets] = useState<number[]>([]);
   const [showSuitSelector, setShowSuitSelector] = useState(false);
   const [hintInfo, setHintInfo] = useState<{ fromColumn: number; fromIndex: number; toColumn: number } | null>(null);
+
+  // Memoize hasHint to avoid recalculating on every render
+  const hasHint = useMemo(() => getHint() !== null, [getHint]);
 
   const handleCardClick = useCallback((columnIndex: number, cardIndex: number) => {
     // Clear hint when clicking
@@ -109,12 +112,13 @@ export const SpiderSolitaire: React.FC = () => {
 
   const handleHint = useCallback(() => {
     const hint = getHint();
-    setHintInfo(hint);
-    setSelectedInfo(null);
-    setValidTargets([]);
-    
-    // Auto-clear hint after 3 seconds
+    console.log('Hint found:', hint);
     if (hint) {
+      setHintInfo(hint);
+      setSelectedInfo(null);
+      setValidTargets([]);
+      
+      // Auto-clear hint after 3 seconds
       setTimeout(() => setHintInfo(null), 3000);
     }
   }, [getHint]);
@@ -151,7 +155,7 @@ export const SpiderSolitaire: React.FC = () => {
           onUndo={undo}
           onHint={handleHint}
           canUndo={canUndo}
-          hasHint={getHint() !== null}
+          hasHint={hasHint}
         />
       </header>
 
