@@ -112,15 +112,19 @@ export const SpiderSolitaire: React.FC = () => {
 
   const handleHint = useCallback(() => {
     const hint = getHint();
-    console.log('Hint found:', hint);
-    if (hint) {
-      setHintInfo(hint);
+    if (!hint) return;
+
+    // Make the hint very visible: select the source and highlight the destination
+    setHintInfo(hint);
+    setSelectedInfo({ column: hint.fromColumn, index: hint.fromIndex });
+    setValidTargets([hint.toColumn]);
+
+    // Auto-clear hint after 3 seconds
+    setTimeout(() => {
+      setHintInfo(null);
       setSelectedInfo(null);
       setValidTargets([]);
-      
-      // Auto-clear hint after 3 seconds
-      setTimeout(() => setHintInfo(null), 3000);
-    }
+    }, 3000);
   }, [getHint]);
 
   const handleWelcomeStart = useCallback(() => {
@@ -141,7 +145,10 @@ export const SpiderSolitaire: React.FC = () => {
       onClick={handleBackgroundClick}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-border/30">
+      <header
+        className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-border/30"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center gap-2">
           <h1 className="font-display text-lg sm:text-xl font-bold text-gold">
             Spider

@@ -4,6 +4,9 @@ import { Card, GameState, Move, DragInfo, SUITS } from '@/types/game';
 const COLUMNS = 10;
 const MAX_UNDO = 5;
 
+const cloneTableau = (tableau: Card[][]): Card[][] =>
+  tableau.map(col => col.map(card => ({ ...card })));
+
 const createDeck = (suitCount: 1 | 2 | 4): Card[] => {
   const deck: Card[] = [];
   const suitsToUse = SUITS.slice(0, suitCount);
@@ -152,7 +155,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
       if (fromColumn === toColumn) return prev;
       if (!isValidMove(cards, prev.tableau[toColumn], prev.suitCount)) return prev;
 
-      const newTableau = prev.tableau.map(col => [...col]);
+       const newTableau = cloneTableau(prev.tableau);
       
       const removedCards = newTableau[fromColumn].splice(fromIndex);
       newTableau[toColumn].push(...removedCards);
@@ -184,14 +187,14 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         }
       }
 
-      const move: Move = {
-        type: hasComplete ? 'complete' : 'move',
-        from: { column: fromColumn, cardIndex: fromIndex },
-        to: { column: toColumn },
-        cards: removedCards,
-        flippedCard,
-        previousTableau: prev.tableau,
-      };
+       const move: Move = {
+         type: hasComplete ? 'complete' : 'move',
+         from: { column: fromColumn, cardIndex: fromIndex },
+         to: { column: toColumn },
+         cards: removedCards,
+         flippedCard,
+         previousTableau: cloneTableau(prev.tableau),
+       };
 
       const newMoves = [...prev.moves.slice(-MAX_UNDO + 1), move];
 
@@ -212,8 +215,8 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
       const hasEmptyColumn = prev.tableau.some(col => col.length === 0);
       if (hasEmptyColumn) return prev;
 
-      const newTableau = prev.tableau.map(col => [...col]);
-      const newStock = [...prev.stock];
+       const newTableau = cloneTableau(prev.tableau);
+       const newStock = [...prev.stock];
 
       for (let i = 0; i < COLUMNS && newStock.length > 0; i++) {
         const card = { ...newStock.pop()!, isFaceUp: true };
@@ -236,13 +239,13 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         }
       }
 
-      const move: Move = {
-        type: 'deal',
-        from: {},
-        to: {},
-        previousTableau: prev.tableau,
-        previousStock: prev.stock,
-      };
+       const move: Move = {
+         type: 'deal',
+         from: {},
+         to: {},
+         previousTableau: cloneTableau(prev.tableau),
+         previousStock: prev.stock.map(c => ({ ...c })),
+       };
 
       const newMoves = [...prev.moves.slice(-MAX_UNDO + 1), move];
 
