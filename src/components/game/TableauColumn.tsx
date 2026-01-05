@@ -27,29 +27,44 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   onEmptyClick,
   onFireworkComplete,
 }) => {
-  // Adaptive overlap - more space for face-down cards to see rank of face-up cards
-  const getCardOverlap = (card: Card, index: number, totalCards: number) => {
+  // Check if card follows the previous card in sequence (same suit, rank - 1)
+  const isInSequence = (cardIndex: number): boolean => {
+    if (cardIndex === 0) return true;
+    const prevCard = cards[cardIndex - 1];
+    const currentCard = cards[cardIndex];
+    
+    if (!prevCard.isFaceUp || !currentCard.isFaceUp) return false;
+    
+    return prevCard.suit === currentCard.suit && prevCard.rank === currentCard.rank + 1;
+  };
+
+  // Adaptive overlap - cards in sequence are grouped, non-sequence cards get extra offset
+  const getCardOverlap = (card: Card, index: number) => {
     const isFaceUp = card.isFaceUp;
     
-    // Face-down cards get minimal overlap (8-12px) to save space
-    // Face-up cards get more overlap (20-28px) to show rank clearly
+    // Face-down cards get minimal overlap
     if (!isFaceUp) {
-      return 10; // Minimal overlap for face-down cards
+      return 10;
     }
     
-    // Face-up cards need more space to show ranks
+    // Face-up cards: check if in sequence with previous
+    const inSequence = isInSequence(index);
+    
+    // Base overlap for face-up cards
     const faceUpCount = cards.filter(c => c.isFaceUp).length;
-    if (faceUpCount <= 5) return 28;
-    if (faceUpCount <= 8) return 24;
-    if (faceUpCount <= 12) return 20;
-    return 18;
+    let baseOverlap = 18;
+    if (faceUpCount <= 5) baseOverlap = 22;
+    else if (faceUpCount <= 8) baseOverlap = 20;
+    
+    // Add extra offset for cards not in sequence to show the rank break
+    return inSequence ? baseOverlap : baseOverlap + 10;
   };
 
   // Calculate cumulative top position for each card
   const getCardTop = (cardIndex: number): number => {
     let top = 0;
     for (let i = 0; i < cardIndex; i++) {
-      top += getCardOverlap(cards[i], i, cards.length);
+      top += getCardOverlap(cards[i], i);
     }
     return top;
   };
@@ -89,7 +104,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
         "relative flex-1 min-w-0",
         "rounded-lg transition-all duration-200",
         isValidTarget && "bg-gold/20",
-        isHintTarget && "bg-success/20",
+        isHintTarget && "animate-hint-flash",
       )}
     >
       <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
@@ -102,7 +117,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             "border-2 border-dashed border-muted-foreground/30",
             "bg-muted/10 transition-all",
             isValidTarget && "border-gold bg-gold/10 scale-105",
-            isHintTarget && "border-success bg-success/10 animate-pulse",
+            isHintTarget && "border-gold/60 animate-hint-flash",
           )}
         />
       ) : (

@@ -138,17 +138,13 @@ export const SpiderSolitaire: React.FC = () => {
     const hint = getHint();
     if (!hint) return;
 
-    // Make the hint very visible: select the source and highlight the destination
+    // Only highlight destination column with a flash
     setHintInfo(hint);
-    setSelectedInfo({ column: hint.fromColumn, index: hint.fromIndex });
-    setValidTargets([hint.toColumn]);
 
-    // Auto-clear hint after 3 seconds
+    // Auto-clear hint after single flash animation (600ms)
     setTimeout(() => {
       setHintInfo(null);
-      setSelectedInfo(null);
-      setValidTargets([]);
-    }, 3000);
+    }, 600);
   }, [getHint]);
 
   const handleWelcomeStart = useCallback(() => {
