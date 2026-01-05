@@ -38,6 +38,12 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     return prevCard.suit === currentCard.suit && prevCard.rank === currentCard.rank + 1;
   };
 
+  // Check if next card breaks the sequence
+  const nextBreaksSequence = (cardIndex: number): boolean => {
+    if (cardIndex >= cards.length - 1) return false;
+    return !isInSequence(cardIndex + 1);
+  };
+
   // Adaptive overlap - cards in sequence are grouped, non-sequence cards get extra offset
   const getCardOverlap = (card: Card, index: number) => {
     const isFaceUp = card.isFaceUp;
@@ -47,17 +53,17 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
       return 10;
     }
     
-    // Face-up cards: check if in sequence with previous
-    const inSequence = isInSequence(index);
-    
     // Base overlap for face-up cards
     const faceUpCount = cards.filter(c => c.isFaceUp).length;
     let baseOverlap = 18;
     if (faceUpCount <= 5) baseOverlap = 22;
     else if (faceUpCount <= 8) baseOverlap = 20;
     
-    // Add extra offset for cards not in sequence to show the rank break
-    return inSequence ? baseOverlap : baseOverlap + 10;
+    // Add extra offset if this card is NOT in sequence with previous
+    // OR if the next card breaks the sequence (to show last card of series)
+    const needsExtraSpace = !isInSequence(index) || nextBreaksSequence(index);
+    
+    return needsExtraSpace ? baseOverlap + 10 : baseOverlap;
   };
 
   // Calculate cumulative top position for each card
