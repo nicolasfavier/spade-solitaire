@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSpiderSolitaire } from '@/hooks/useSpiderSolitaire';
 import { TableauColumn } from './TableauColumn';
 import { StockPile } from './StockPile';
@@ -7,7 +7,8 @@ import { GameControls } from './GameControls';
 import { VictoryOverlay } from './VictoryOverlay';
 import { SuitSelector } from './SuitSelector';
 import { WelcomeScreen } from './WelcomeScreen';
-import { DragInfo } from '@/types/game';
+import { DragOverlay } from './DragOverlay';
+import { DragInfo, Card } from '@/types/game';
 
 export const SpiderSolitaire: React.FC = () => {
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -30,6 +31,8 @@ export const SpiderSolitaire: React.FC = () => {
   const [showSuitSelector, setShowSuitSelector] = useState(false);
   const [fireworkColumns, setFireworkColumns] = useState<Set<number>>(new Set());
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
+  const [draggedCards, setDraggedCards] = useState<Card[]>([]);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [validTargets, setValidTargets] = useState<number[]>([]);
 
   const triggerFirework = useCallback((columnIndex: number) => {
@@ -44,17 +47,25 @@ export const SpiderSolitaire: React.FC = () => {
     });
   }, []);
 
-  const handleDragStart = useCallback((columnIndex: number, cardIndex: number) => {
+  const handleDragStart = useCallback((columnIndex: number, cardIndex: number, clientX: number, clientY: number) => {
     if (!canDragFrom(columnIndex, cardIndex)) return;
     
     const cards = gameState.tableau[columnIndex].slice(cardIndex);
     const info: DragInfo = { cards, fromColumn: columnIndex, fromIndex: cardIndex };
     setDragInfo(info);
+    setDraggedCards(cards);
+    setDragPosition({ x: clientX, y: clientY });
     setValidTargets(getValidDropTargets(cards));
   }, [canDragFrom, gameState.tableau, getValidDropTargets]);
 
+  const handleDragMove = useCallback((clientX: number, clientY: number) => {
+    if (!dragInfo) return;
+    setDragPosition({ x: clientX, y: clientY });
+  }, [dragInfo]);
+
   const handleDragEnd = useCallback(() => {
     setDragInfo(null);
+    setDraggedCards([]);
     setValidTargets([]);
   }, []);
 
@@ -67,8 +78,46 @@ export const SpiderSolitaire: React.FC = () => {
     }
     
     setDragInfo(null);
+    setDraggedCards([]);
     setValidTargets([]);
   }, [dragInfo, moveCards, triggerFirework]);
+
+  // Global pointer move and up handlers
+  useEffect(() => {
+    if (!dragInfo) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      handleDragMove(e.clientX, e.clientY);
+    };
+
+    const handlePointerUp = (e: PointerEvent) => {
+      // Find which column we're over
+      const elements = document.elementsFromPoint(e.clientX, e.clientY);
+      let droppedOnColumn: number | null = null;
+      
+      for (const el of elements) {
+        const columnAttr = el.getAttribute('data-column');
+        if (columnAttr !== null) {
+          droppedOnColumn = parseInt(columnAttr, 10);
+          break;
+        }
+      }
+      
+      if (droppedOnColumn !== null && validTargets.includes(droppedOnColumn)) {
+        handleDrop(droppedOnColumn);
+      } else {
+        handleDragEnd();
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [dragInfo, validTargets, handleDragMove, handleDrop, handleDragEnd]);
 
   const handleDeal = useCallback(() => {
     const completedColumns = dealFromStock();
@@ -83,6 +132,7 @@ export const SpiderSolitaire: React.FC = () => {
     newGame(suitCount);
     setShowSuitSelector(false);
     setDragInfo(null);
+    setDraggedCards([]);
     setValidTargets([]);
   }, [newGame]);
 
@@ -98,7 +148,7 @@ export const SpiderSolitaire: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen felt-texture flex flex-col">
+    <div className="min-h-screen felt-texture flex flex-col select-none">
       {/* Header */}
       <header className="flex items-center justify-between px-3 py-2 md:px-6 md:py-3 border-b border-border/30">
         <div className="flex items-center gap-2 md:gap-3">
@@ -131,8 +181,6 @@ export const SpiderSolitaire: React.FC = () => {
               dragFromIndex={dragInfo?.fromIndex ?? null}
               showFirework={fireworkColumns.has(index)}
               onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDrop={() => handleDrop(index)}
               onFireworkComplete={() => handleFireworkComplete(index)}
             />
           ))}
@@ -150,6 +198,11 @@ export const SpiderSolitaire: React.FC = () => {
           <CompletedSequences count={gameState.completedSequences} />
         </div>
       </main>
+
+      {/* Drag overlay - floating cards that follow cursor */}
+      {dragInfo && draggedCards.length > 0 && (
+        <DragOverlay cards={draggedCards} position={dragPosition} />
+      )}
 
       {/* Victory overlay */}
       {gameState.isWon && (
