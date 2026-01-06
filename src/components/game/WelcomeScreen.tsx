@@ -57,7 +57,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
 
         {/* Footer */}
         <p className="text-muted-foreground text-xs mt-8">
-          Tapez sur une carte pour la sélectionner, puis sur la destination
+          Glissez-déposez les cartes pour les déplacer
         </p>
       </div>
     </div>

@@ -157,7 +157,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
       if (fromColumn === toColumn) return prev;
       if (!isValidMove(cards, prev.tableau[toColumn], prev.suitCount)) return prev;
 
-       const newTableau = cloneTableau(prev.tableau);
+      const newTableau = cloneTableau(prev.tableau);
       
       const removedCards = newTableau[fromColumn].splice(fromIndex);
       newTableau[toColumn].push(...removedCards);
@@ -190,14 +190,14 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         }
       }
 
-       const move: Move = {
-         type: hasComplete ? 'complete' : 'move',
-         from: { column: fromColumn, cardIndex: fromIndex },
-         to: { column: toColumn },
-         cards: removedCards,
-         flippedCard,
-         previousTableau: cloneTableau(prev.tableau),
-       };
+      const move: Move = {
+        type: hasComplete ? 'complete' : 'move',
+        from: { column: fromColumn, cardIndex: fromIndex },
+        to: { column: toColumn },
+        cards: removedCards,
+        flippedCard,
+        previousTableau: cloneTableau(prev.tableau),
+      };
 
       const newMoves = [...prev.moves.slice(-MAX_UNDO + 1), move];
 
@@ -222,8 +222,8 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
       const hasEmptyColumn = prev.tableau.some(col => col.length === 0);
       if (hasEmptyColumn) return prev;
 
-       const newTableau = cloneTableau(prev.tableau);
-       const newStock = [...prev.stock];
+      const newTableau = cloneTableau(prev.tableau);
+      const newStock = [...prev.stock];
 
       for (let i = 0; i < COLUMNS && newStock.length > 0; i++) {
         const card = { ...newStock.pop()!, isFaceUp: true };
@@ -247,13 +247,13 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
         }
       }
 
-       const move: Move = {
-         type: 'deal',
-         from: {},
-         to: {},
-         previousTableau: cloneTableau(prev.tableau),
-         previousStock: prev.stock.map(c => ({ ...c })),
-       };
+      const move: Move = {
+        type: 'deal',
+        from: {},
+        to: {},
+        previousTableau: cloneTableau(prev.tableau),
+        previousStock: prev.stock.map(c => ({ ...c })),
+      };
 
       const newMoves = [...prev.moves.slice(-MAX_UNDO + 1), move];
 
@@ -306,39 +306,6 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
 
   const hasEmptyColumn = gameState.tableau.some(col => col.length === 0);
 
-  const getHint = useCallback((): { fromColumn: number; fromIndex: number; toColumn: number } | null => {
-    const { tableau, suitCount } = gameState;
-    
-    // Find a valid move
-    for (let fromCol = 0; fromCol < COLUMNS; fromCol++) {
-      const column = tableau[fromCol];
-      for (let fromIdx = column.length - 1; fromIdx >= 0; fromIdx--) {
-        if (!canMoveSequence(column, fromIdx, suitCount)) continue;
-        
-        const cards = column.slice(fromIdx);
-        
-        // Find a valid target (prefer non-empty columns for better moves)
-        for (let toCol = 0; toCol < COLUMNS; toCol++) {
-          if (toCol === fromCol) continue;
-          if (tableau[toCol].length === 0) continue; // Skip empty for now
-          if (isValidMove(cards, tableau[toCol], suitCount)) {
-            return { fromColumn: fromCol, fromIndex: fromIdx, toColumn: toCol };
-          }
-        }
-        
-        // Then try empty columns
-        for (let toCol = 0; toCol < COLUMNS; toCol++) {
-          if (toCol === fromCol) continue;
-          if (tableau[toCol].length === 0) {
-            return { fromColumn: fromCol, fromIndex: fromIdx, toColumn: toCol };
-          }
-        }
-      }
-    }
-    
-    return null;
-  }, [gameState]);
-
   return {
     gameState,
     newGame,
@@ -347,7 +314,6 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     undo,
     canDragFrom,
     getValidDropTargets,
-    getHint,
     canUndo: gameState.moves.length > 0,
     canDeal: gameState.stock.length > 0 && !hasEmptyColumn,
     hasEmptyColumn,
