@@ -12,9 +12,7 @@ interface TableauColumnProps {
   dragFromColumn: number | null;
   dragFromIndex: number | null;
   showFirework?: boolean;
-  onDragStart: (columnIndex: number, cardIndex: number) => void;
-  onDragEnd: () => void;
-  onDrop: () => void;
+  onDragStart: (columnIndex: number, cardIndex: number, clientX: number, clientY: number) => void;
   onFireworkComplete?: () => void;
 }
 
@@ -27,13 +25,8 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   dragFromIndex,
   showFirework = false,
   onDragStart,
-  onDragEnd,
-  onDrop,
   onFireworkComplete,
 }) => {
-  const columnRef = useRef<HTMLDivElement>(null);
-  const dragStartPos = useRef<{ x: number; y: number } | null>(null);
-
   // Check if card follows the previous card in sequence (same suit, rank - 1)
   const isInSequence = (cardIndex: number): boolean => {
     if (cardIndex === 0) return true;
@@ -91,7 +84,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     onFireworkComplete?.();
   }, [onFireworkComplete]);
 
-  // Touch/Mouse handlers for drag and drop
+  // Pointer down handler
   const handlePointerDown = useCallback((e: React.PointerEvent, cardIndex: number) => {
     const card = cards[cardIndex];
     if (!card.isFaceUp) return;
@@ -99,33 +92,8 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     e.preventDefault();
     e.stopPropagation();
     
-    dragStartPos.current = { x: e.clientX, y: e.clientY };
-    
-    // Start drag immediately for better responsiveness
-    onDragStart(columnIndex, cardIndex);
+    onDragStart(columnIndex, cardIndex, e.clientX, e.clientY);
   }, [cards, columnIndex, onDragStart]);
-
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!isDragging) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Check if we're over a valid target
-    if (isValidTarget && dragFromColumn !== columnIndex) {
-      onDrop();
-    } else {
-      onDragEnd();
-    }
-    
-    dragStartPos.current = null;
-  }, [isDragging, isValidTarget, dragFromColumn, columnIndex, onDrop, onDragEnd]);
-
-  const handleEmptyColumnClick = useCallback(() => {
-    if (isDragging && isValidTarget) {
-      onDrop();
-    }
-  }, [isDragging, isValidTarget, onDrop]);
 
   // Calculate total height needed
   const totalHeight = cards.length > 0 
@@ -134,28 +102,28 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
 
   return (
     <div
-      ref={columnRef}
+      data-column={columnIndex}
       className={cn(
         "relative flex-1 min-w-0",
         "rounded-lg transition-all duration-200",
         isValidTarget && isDragging && "bg-gold/20 ring-2 ring-gold/50",
       )}
-      onPointerUp={handlePointerUp}
     >
       <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
       
       {cards.length === 0 ? (
         <div 
-          onClick={handleEmptyColumnClick}
+          data-column={columnIndex}
           className={cn(
             "aspect-[2.5/3.5] rounded-lg",
             "border-2 border-dashed border-muted-foreground/30",
             "bg-muted/10 transition-all",
-            isValidTarget && isDragging && "border-gold bg-gold/10 scale-105 cursor-pointer",
+            isValidTarget && isDragging && "border-gold bg-gold/10 scale-105",
           )}
         />
       ) : (
         <div 
+          data-column={columnIndex}
           className="relative touch-none" 
           style={{ paddingBottom: `${totalHeight}px` }}
         >
@@ -167,13 +135,14 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             return (
               <div
                 key={card.id}
+                data-column={columnIndex}
                 className={cn(
-                  "absolute left-0 right-0 transition-all duration-200",
-                  dragging && "opacity-50 scale-95",
+                  "absolute left-0 right-0 transition-opacity duration-150",
+                  dragging && "opacity-30",
                 )}
                 style={{
                   top: `${top}px`,
-                  zIndex: dragging ? 50 + index : index,
+                  zIndex: index,
                 }}
                 onPointerDown={(e) => handlePointerDown(e, index)}
               >
