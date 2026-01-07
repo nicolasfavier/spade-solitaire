@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.nicolasfavier.spider",
+    "sha256_cert_fingerprints": [
+      "D4:A4:A1:9C:E3:EF:CC:E0:00:EA:7B:6A:1D:79:1F:7B:8A:BE:3A:C8:49:0A:8C:C9:9B:01:17:84:0E:AB:1F:E9"
+    ]
+  }
+}]
