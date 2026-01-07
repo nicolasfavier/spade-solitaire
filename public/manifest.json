@@ -1,0 +1,24 @@
+{
+  "name": "Solitaire",
+  "short_name": "Solitaire",
+  "description": "Application de solitaire sans pub",
+  "theme_color": "#1a472a",
+  "background_color": "#1a472a",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
