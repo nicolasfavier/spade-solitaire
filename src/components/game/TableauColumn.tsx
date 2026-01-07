@@ -136,10 +136,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
               <div
                 key={card.id}
                 data-column={columnIndex}
-                className={cn(
-                  "absolute left-0 right-0 transition-opacity duration-150",
-                  dragging && "opacity-30",
-                )}
+                className="absolute left-0 right-0"
                 style={{
                   top: `${top}px`,
                   zIndex: index,
