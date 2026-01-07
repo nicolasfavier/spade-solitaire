@@ -27,7 +27,7 @@ export const DragOverlay: React.FC<DragOverlayProps> = ({ cards, position }) => 
           key={card.id}
           className="absolute left-0 right-0 transition-none"
           style={{
-            top: `${index * 22}px`,
+            top: `${index * 32}px`,
             zIndex: index,
           }}
         >
