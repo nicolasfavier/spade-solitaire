@@ -6,6 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: '/spade-solitaire/',
   server: {
     host: "::",
     port: 8080,
@@ -24,7 +25,7 @@ export default defineConfig(({ mode }) => ({
         background_color: "#1a472a",
         display: "standalone",
         orientation: "any",
-        start_url: "/",
+        start_url: "/spade-solitaire/",
         icons: [
           {
             src: "/pwa-192x192.png",
