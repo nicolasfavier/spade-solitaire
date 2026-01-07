@@ -96,7 +96,6 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
         "bg-card card-shadow",
         "border border-border/20",
         "transition-all duration-150",
-        isDragging && "opacity-50",
         isValidTarget && "ring-2 ring-gold/70",
         isTop && "cursor-grab active:cursor-grabbing",
       )}
