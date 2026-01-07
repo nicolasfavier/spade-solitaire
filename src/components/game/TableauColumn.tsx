@@ -12,6 +12,8 @@ interface TableauColumnProps {
   dragFromColumn: number | null;
   dragFromIndex: number | null;
   showFirework?: boolean;
+  jokerHintFrom?: number | null;
+  jokerHintTo?: boolean;
   onDragStart: (columnIndex: number, cardIndex: number, clientX: number, clientY: number) => void;
   onFireworkComplete?: () => void;
 }
@@ -24,6 +26,8 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   dragFromColumn,
   dragFromIndex,
   showFirework = false,
+  jokerHintFrom = null,
+  jokerHintTo = false,
   onDragStart,
   onFireworkComplete,
 }) => {
@@ -80,6 +84,10 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     return dragFromIndex !== null && cardIndex >= dragFromIndex;
   };
 
+  const isJokerHighlighted = (cardIndex: number) => {
+    return jokerHintFrom !== null && cardIndex >= jokerHintFrom;
+  };
+
   const handleFireworkComplete = useCallback(() => {
     onFireworkComplete?.();
   }, [onFireworkComplete]);
@@ -107,6 +115,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
         "relative flex-1 min-w-0",
         "rounded-lg transition-all duration-200",
         isValidTarget && isDragging && "bg-gold/20 ring-2 ring-gold/50",
+        jokerHintTo && "ring-2 ring-amber-400/80 bg-amber-400/10",
       )}
     >
       <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
@@ -119,6 +128,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             "border-2 border-dashed border-muted-foreground/30",
             "bg-muted/10 transition-all",
             isValidTarget && isDragging && "border-gold bg-gold/10 scale-105",
+            jokerHintTo && "border-amber-400 bg-amber-400/20",
           )}
         />
       ) : (
@@ -130,6 +140,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
           {cards.map((card, index) => {
             const isTop = index === cards.length - 1;
             const dragging = isBeingDragged(index);
+            const jokerHighlight = isJokerHighlighted(index);
             const top = getCardTop(index);
 
             return (
@@ -138,7 +149,8 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
                 data-column={columnIndex}
                 className={cn(
                   "absolute left-0 right-0",
-                  dragging && "opacity-0"
+                  dragging && "opacity-0",
+                  jokerHighlight && "animate-joker-flicker"
                 )}
                 style={{
                   top: `${top}px`,

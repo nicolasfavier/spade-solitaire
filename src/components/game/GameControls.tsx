@@ -1,12 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { RotateCcw, RefreshCw } from 'lucide-react';
+import { RotateCcw, RefreshCw, Sparkles } from 'lucide-react';
 
 interface GameControlsProps {
   onNewGame: () => void;
   onUndo: () => void;
+  onJoker: () => void;
   canUndo: boolean;
+  canJoker: boolean;
   showDropIndicator: boolean;
   onToggleDropIndicator: (value: boolean) => void;
 }
@@ -14,7 +16,9 @@ interface GameControlsProps {
 export const GameControls: React.FC<GameControlsProps> = ({
   onNewGame,
   onUndo,
+  onJoker,
   canUndo,
+  canJoker,
   showDropIndicator,
   onToggleDropIndicator,
 }) => {
@@ -31,6 +35,17 @@ export const GameControls: React.FC<GameControlsProps> = ({
           Aide
         </label>
       </div>
+      
+      <Button
+        variant="game"
+        size="sm"
+        onClick={onJoker}
+        disabled={!canJoker}
+        className="gap-1.5"
+      >
+        <Sparkles className="w-4 h-4" />
+        <span className="hidden sm:inline">Joker</span>
+      </Button>
       
       <Button
         variant="game"

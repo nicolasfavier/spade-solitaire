@@ -193,3 +193,16 @@
   animation: pulse-gold 2s ease-in-out infinite;
 }
 
+@keyframes jokerFlicker {
+  0%, 100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 20px 4px hsl(45 93% 58% / 0.8);
+  }
+}
+
+.animate-joker-flicker {
+  animation: jokerFlicker 0.4s ease-in-out;
+}
+
