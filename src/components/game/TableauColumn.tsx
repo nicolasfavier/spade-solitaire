@@ -138,11 +138,12 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
                 data-column={columnIndex}
                 className={cn(
                   "absolute left-0 right-0",
-                  dragging && "invisible"
+                  dragging && "opacity-0"
                 )}
                 style={{
                   top: `${top}px`,
                   zIndex: index,
+                  transition: 'none',
                 }}
                 onPointerDown={(e) => handlePointerDown(e, index)}
               >
