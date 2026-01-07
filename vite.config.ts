@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/spade-solitaire/',
+  base: mode === 'production' ? '/spade-solitaire/' : '/',
   server: {
     host: "::",
     port: 8080,
