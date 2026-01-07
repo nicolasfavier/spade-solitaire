@@ -306,6 +306,95 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
 
   const hasEmptyColumn = gameState.tableau.some(col => col.length === 0);
 
+  // Find an interesting move suggestion
+  const findInterestingMove = useCallback((): { fromColumn: number; fromIndex: number; toColumn: number } | null => {
+    const { tableau, suitCount } = gameState;
+    
+    const candidates: Array<{
+      fromColumn: number;
+      fromIndex: number;
+      toColumn: number;
+      score: number;
+    }> = [];
+
+    for (let fromCol = 0; fromCol < COLUMNS; fromCol++) {
+      const column = tableau[fromCol];
+      if (column.length === 0) continue;
+
+      // Find all movable sequences in this column
+      for (let fromIdx = 0; fromIdx < column.length; fromIdx++) {
+        if (!canMoveSequence(column, fromIdx, suitCount)) continue;
+
+        const cards = column.slice(fromIdx);
+        const hasFaceDownBelow = fromIdx > 0 && !column[fromIdx - 1].isFaceUp;
+        
+        // Check all possible target columns
+        for (let toCol = 0; toCol < COLUMNS; toCol++) {
+          if (toCol === fromCol) continue;
+          
+          const targetColumn = tableau[toCol];
+          if (!isValidMove(cards, targetColumn, suitCount)) continue;
+
+          // Calculate move score (higher = more interesting)
+          let score = 0;
+
+          // Priority 1: Reveals a face-down card
+          if (hasFaceDownBelow) {
+            score += 100;
+          }
+
+          // Priority 2: Builds same-suit sequence (important for multi-suit)
+          if (targetColumn.length > 0) {
+            const targetTop = targetColumn[targetColumn.length - 1];
+            if (targetTop.suit === cards[0].suit) {
+              score += 50;
+            }
+          }
+
+          // Priority 3: Moving to empty column with a King is good
+          if (targetColumn.length === 0 && cards[0].rank === 13) {
+            score += 30;
+          }
+
+          // Priority 4: Creates longer sequence
+          if (targetColumn.length > 0) {
+            const targetTop = targetColumn[targetColumn.length - 1];
+            if (targetTop.suit === cards[0].suit) {
+              // Count how long the sequence would become
+              let seqLength = cards.length;
+              for (let i = targetColumn.length - 1; i >= 0; i--) {
+                if (targetColumn[i].suit === cards[0].suit && 
+                    targetColumn[i].rank === cards[0].rank + (targetColumn.length - i)) {
+                  seqLength++;
+                } else {
+                  break;
+                }
+              }
+              score += seqLength * 2;
+            }
+          }
+
+          // Skip moves that don't accomplish anything meaningful
+          // (moving a sequence that's already well-placed to another valid spot)
+          if (score === 0) continue;
+
+          // Avoid moving to empty column unless it's a King or reveals a card
+          if (targetColumn.length === 0 && cards[0].rank !== 13 && !hasFaceDownBelow) {
+            continue;
+          }
+
+          candidates.push({ fromColumn: fromCol, fromIndex: fromIdx, toColumn: toCol, score });
+        }
+      }
+    }
+
+    if (candidates.length === 0) return null;
+
+    // Sort by score and return the best move
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates[0];
+  }, [gameState]);
+
   return {
     gameState,
     newGame,
@@ -314,6 +403,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     undo,
     canDragFrom,
     getValidDropTargets,
+    findInterestingMove,
     canUndo: gameState.moves.length > 0,
     canDeal: gameState.stock.length > 0 && !hasEmptyColumn,
     hasEmptyColumn,

@@ -23,6 +23,7 @@ export const SpiderSolitaire: React.FC = () => {
     undo,
     canDragFrom,
     getValidDropTargets,
+    findInterestingMove,
     canUndo,
     canDeal,
     hasEmptyColumn,
@@ -37,6 +38,7 @@ export const SpiderSolitaire: React.FC = () => {
   const [showDropIndicator, setShowDropIndicator] = useState(() => {
     return localStorage.getItem('spider-show-drop-indicator') !== 'false';
   });
+  const [jokerHint, setJokerHint] = useState<{ fromColumn: number; fromIndex: number; toColumn: number } | null>(null);
 
   const triggerFirework = useCallback((columnIndex: number) => {
     setFireworkColumns(prev => new Set([...prev, columnIndex]));
@@ -137,12 +139,22 @@ export const SpiderSolitaire: React.FC = () => {
     setDragInfo(null);
     setDraggedCards([]);
     setValidTargets([]);
+    setJokerHint(null);
   }, [newGame]);
 
   const handleWelcomeStart = useCallback(() => {
     setShowWelcome(false);
     setShowSuitSelector(true);
   }, []);
+
+  const handleJoker = useCallback(() => {
+    const hint = findInterestingMove();
+    if (hint) {
+      setJokerHint(hint);
+      // Auto-clear after a short flicker
+      setTimeout(() => setJokerHint(null), 400);
+    }
+  }, [findInterestingMove]);
 
   const remainingDeals = Math.floor(gameState.stock.length / 10);
 
@@ -165,7 +177,9 @@ export const SpiderSolitaire: React.FC = () => {
         <GameControls
           onNewGame={handleNewGame}
           onUndo={undo}
+          onJoker={handleJoker}
           canUndo={canUndo}
+          canJoker={findInterestingMove() !== null}
           showDropIndicator={showDropIndicator}
           onToggleDropIndicator={(value) => {
             setShowDropIndicator(value);
@@ -188,6 +202,8 @@ export const SpiderSolitaire: React.FC = () => {
               dragFromColumn={dragInfo?.fromColumn ?? null}
               dragFromIndex={dragInfo?.fromIndex ?? null}
               showFirework={fireworkColumns.has(index)}
+              jokerHintFrom={jokerHint?.fromColumn === index ? jokerHint.fromIndex : null}
+              jokerHintTo={jokerHint?.toColumn === index}
               onDragStart={handleDragStart}
               onFireworkComplete={() => handleFireworkComplete(index)}
             />
