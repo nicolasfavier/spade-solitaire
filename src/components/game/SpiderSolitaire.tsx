@@ -34,6 +34,9 @@ export const SpiderSolitaire: React.FC = () => {
   const [draggedCards, setDraggedCards] = useState<Card[]>([]);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [validTargets, setValidTargets] = useState<number[]>([]);
+  const [showDropIndicator, setShowDropIndicator] = useState(() => {
+    return localStorage.getItem('spider-show-drop-indicator') !== 'false';
+  });
 
   const triggerFirework = useCallback((columnIndex: number) => {
     setFireworkColumns(prev => new Set([...prev, columnIndex]));
@@ -163,6 +166,11 @@ export const SpiderSolitaire: React.FC = () => {
           onNewGame={handleNewGame}
           onUndo={undo}
           canUndo={canUndo}
+          showDropIndicator={showDropIndicator}
+          onToggleDropIndicator={(value) => {
+            setShowDropIndicator(value);
+            localStorage.setItem('spider-show-drop-indicator', String(value));
+          }}
         />
       </header>
 
@@ -175,7 +183,7 @@ export const SpiderSolitaire: React.FC = () => {
               key={index}
               cards={cards}
               columnIndex={index}
-              isValidTarget={validTargets.includes(index)}
+              isValidTarget={showDropIndicator && validTargets.includes(index)}
               isDragging={dragInfo !== null}
               dragFromColumn={dragInfo?.fromColumn ?? null}
               dragFromIndex={dragInfo?.fromIndex ?? null}
