@@ -35,11 +35,11 @@ export const Fireworks: React.FC = () => {
   useEffect(() => {
     const createFirework = () => {
       const id = Date.now() + Math.random();
-      const x = 20 + Math.random() * 60; // 20-80% of screen width
-      const y = 20 + Math.random() * 40; // 20-60% of screen height
+      const x = 10 + Math.random() * 80; // 10-90% of screen width
+      const y = 10 + Math.random() * 50; // 10-60% of screen height
       
       const particles: Particle[] = [];
-      const particleCount = 30 + Math.floor(Math.random() * 20);
+      const particleCount = 50 + Math.floor(Math.random() * 30); // More particles
       
       for (let i = 0; i < particleCount; i++) {
         particles.push({
@@ -47,19 +47,19 @@ export const Fireworks: React.FC = () => {
           x: 0,
           y: 0,
           color: COLORS[Math.floor(Math.random() * COLORS.length)],
-          size: 2 + Math.random() * 4,
+          size: 4 + Math.random() * 6, // Bigger particles
           angle: (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5,
-          speed: 2 + Math.random() * 4,
+          speed: 3 + Math.random() * 6, // Faster
           opacity: 1,
-          decay: 0.015 + Math.random() * 0.01,
+          decay: 0.008 + Math.random() * 0.006, // Slower decay
         });
       }
 
       return { id, x, y, particles };
     };
 
-    // Initial fireworks
-    const initialFireworks = [createFirework(), createFirework(), createFirework()];
+    // More initial fireworks
+    const initialFireworks = [createFirework(), createFirework(), createFirework(), createFirework()];
     setFireworks(initialFireworks);
 
     // Add new fireworks periodically
@@ -70,7 +70,7 @@ export const Fireworks: React.FC = () => {
         );
         return [...filtered, createFirework()];
       });
-    }, 800);
+    }, 500); // Faster spawning
 
     // Animation frame
     const animate = () => {
@@ -80,15 +80,15 @@ export const Fireworks: React.FC = () => {
           particles: fw.particles.map(p => ({
             ...p,
             x: p.x + Math.cos(p.angle) * p.speed,
-            y: p.y + Math.sin(p.angle) * p.speed + 0.5, // gravity
-            speed: p.speed * 0.97,
+            y: p.y + Math.sin(p.angle) * p.speed + 0.4, // gravity
+            speed: p.speed * 0.98,
             opacity: Math.max(0, p.opacity - p.decay),
           })),
         }))
       );
     };
 
-    const animationInterval = setInterval(animate, 30);
+    const animationInterval = setInterval(animate, 25);
 
     return () => {
       clearInterval(interval);
@@ -97,7 +97,7 @@ export const Fireworks: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">
       {fireworks.map(fw => (
         <div
           key={fw.id}
@@ -118,7 +118,7 @@ export const Fireworks: React.FC = () => {
                 height: p.size,
                 backgroundColor: p.color,
                 opacity: p.opacity,
-                boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+                boxShadow: `0 0 ${p.size * 3}px ${p.color}, 0 0 ${p.size * 6}px ${p.color}50`,
                 transform: 'translate(-50%, -50%)',
               }}
             />

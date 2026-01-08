@@ -10,9 +10,15 @@ interface VictoryOverlayProps {
 export const VictoryOverlay: React.FC<VictoryOverlayProps> = ({ onPlayAgain }) => {
   return (
     <>
+      {/* Background blur layer */}
+      <div className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm animate-fade-in" />
+      
+      {/* Fireworks on TOP of blur */}
       <Fireworks />
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm animate-fade-in">
-        <div className="bg-secondary border border-gold/30 rounded-2xl p-8 max-w-sm mx-4 text-center animate-scale-in shadow-2xl gold-glow">
+      
+      {/* Content on TOP of fireworks */}
+      <div className="fixed inset-0 z-[70] flex items-center justify-center pointer-events-none animate-fade-in">
+        <div className="bg-secondary border border-gold/30 rounded-2xl p-8 max-w-sm mx-4 text-center animate-scale-in shadow-2xl gold-glow pointer-events-auto">
           <div className="w-24 h-24 mx-auto mb-4 bg-gold/20 rounded-full flex items-center justify-center animate-pulse-gold">
             <Trophy className="w-12 h-12 text-gold" />
           </div>

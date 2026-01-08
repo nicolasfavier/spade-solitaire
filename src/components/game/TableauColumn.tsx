@@ -48,26 +48,30 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     return !isInSequence(cardIndex + 1);
   };
 
-  // Adaptive overlap - cards in sequence are grouped, non-sequence cards get extra offset
+  // Adaptive overlap based on viewport and card count
   const getCardOverlap = (card: Card, index: number) => {
     const isFaceUp = card.isFaceUp;
     
     // Face-down cards get minimal overlap
     if (!isFaceUp) {
-      return 10;
+      return 8;
     }
     
-    // Base overlap for face-up cards - larger on tablet
+    // Dynamic base overlap based on number of face-up cards
     const faceUpCount = cards.filter(c => c.isFaceUp).length;
-    let baseOverlap = 22;
-    if (faceUpCount <= 5) baseOverlap = 28;
-    else if (faceUpCount <= 8) baseOverlap = 25;
+    const totalCards = cards.length;
     
-    // Add extra offset if this card is NOT in sequence with previous
-    // OR if the next card breaks the sequence (to show last card of series)
+    // Start with larger overlap and reduce as more cards appear
+    let baseOverlap: number;
+    if (totalCards <= 4) baseOverlap = 26;
+    else if (totalCards <= 6) baseOverlap = 22;
+    else if (totalCards <= 10) baseOverlap = 18;
+    else baseOverlap = 14;
+    
+    // Extra space at sequence breaks to show values
     const needsExtraSpace = !isInSequence(index) || nextBreaksSequence(index);
     
-    return needsExtraSpace ? baseOverlap + 12 : baseOverlap;
+    return needsExtraSpace ? baseOverlap + 10 : baseOverlap;
   };
 
   // Calculate cumulative top position for each card

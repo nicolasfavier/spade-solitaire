@@ -60,13 +60,13 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     return (
       <div
         className={cn(
-          "relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
+          "relative w-full aspect-[2.5/3.5] rounded-md sm:rounded-lg overflow-hidden",
           "bg-[hsl(220,70%,35%)] card-shadow",
-          "border-2 border-[hsl(220,70%,45%)]",
+          "border border-[hsl(220,70%,45%)] sm:border-2",
         )}
         style={style}
       >
-        <div className="absolute inset-1 rounded-md overflow-hidden">
+        <div className="absolute inset-0.5 sm:inset-1 rounded-sm sm:rounded-md overflow-hidden">
           <div 
             className="absolute inset-0"
             style={{
@@ -82,7 +82,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
             }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
+            <div className="w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   return (
     <div
       className={cn(
-        "relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
+        "relative w-full aspect-[2.5/3.5] rounded-md sm:rounded-lg overflow-hidden",
         "bg-card card-shadow",
         "border border-border/20",
         "transition-all duration-150",
@@ -102,24 +102,24 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       style={style}
     >
       <div className={cn(
-        "absolute inset-0 p-1.5 md:p-2 flex flex-col",
+        "absolute inset-0 p-0.5 sm:p-1 md:p-1.5 flex flex-col",
         isRed ? "text-red-600" : "text-card-foreground"
       )}>
-        {/* Top left rank/suit */}
-        <div className="flex items-center gap-0.5 leading-none bg-card/90 rounded px-0.5">
-          <span className="text-lg md:text-2xl font-black drop-shadow-sm">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 md:w-5 md:h-5" />
+        {/* Top left rank/suit - always visible */}
+        <div className="flex items-center gap-0 sm:gap-0.5 leading-none bg-card/95 rounded px-0.5 w-fit">
+          <span className="text-xs sm:text-sm md:text-xl font-black drop-shadow-sm">{rankDisplay}</span>
+          <SuitIcon suit={card.suit} className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4" />
         </div>
 
         {/* Center suit */}
         <div className="flex-1 flex items-center justify-center">
-          <SuitIcon suit={card.suit} className="w-10 h-10 md:w-14 md:h-14" />
+          <SuitIcon suit={card.suit} className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12" />
         </div>
 
         {/* Bottom right rank/suit (rotated) */}
-        <div className="flex items-center gap-0.5 leading-none rotate-180 bg-card/90 rounded px-0.5">
-          <span className="text-lg md:text-2xl font-black drop-shadow-sm">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 md:w-5 md:h-5" />
+        <div className="flex items-center gap-0 sm:gap-0.5 leading-none rotate-180 bg-card/95 rounded px-0.5 w-fit">
+          <span className="text-xs sm:text-sm md:text-xl font-black drop-shadow-sm">{rankDisplay}</span>
+          <SuitIcon suit={card.suit} className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4" />
         </div>
       </div>
     </div>

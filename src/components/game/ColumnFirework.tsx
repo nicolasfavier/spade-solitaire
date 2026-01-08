@@ -24,30 +24,30 @@ export const ColumnFirework: React.FC<ColumnFireworkProps> = ({ isActive, onComp
   useEffect(() => {
     if (!isActive) return;
 
-    // Create initial burst of particles
+    // Create initial burst of particles - more particles, bigger
     const newParticles: Particle[] = [];
-    const particleCount = 30;
+    const particleCount = 50; // More particles
     
     for (let i = 0; i < particleCount; i++) {
       const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.3;
-      const speed = 2 + Math.random() * 4;
+      const speed = 3 + Math.random() * 6; // Faster
       newParticles.push({
         id: i,
         x: 50,
-        y: 50,
+        y: 40, // Start slightly higher
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        vy: Math.sin(angle) * speed - 2, // Initial upward boost
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        size: 3 + Math.random() * 4,
+        size: 5 + Math.random() * 6, // Bigger
         opacity: 1,
       });
     }
     setParticles(newParticles);
 
-    // Animation loop
+    // Animation loop - longer duration
     let animationFrame: number;
     let frame = 0;
-    const maxFrames = 60;
+    const maxFrames = 120; // Double the duration
 
     const animate = () => {
       frame++;
@@ -62,9 +62,9 @@ export const ColumnFirework: React.FC<ColumnFireworkProps> = ({ isActive, onComp
           ...p,
           x: p.x + p.vx,
           y: p.y + p.vy,
-          vy: p.vy + 0.15, // gravity
-          opacity: p.opacity - 0.02,
-          size: p.size * 0.98,
+          vy: p.vy + 0.12, // Slower gravity
+          opacity: p.opacity - 0.012, // Slower fade
+          size: p.size * 0.99,
         })).filter(p => p.opacity > 0)
       );
 
@@ -81,7 +81,7 @@ export const ColumnFirework: React.FC<ColumnFireworkProps> = ({ isActive, onComp
   if (!isActive || particles.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+    <div className="absolute inset-0 pointer-events-none overflow-visible z-50" style={{ overflow: 'visible' }}>
       {particles.map(particle => (
         <div
           key={particle.id}
@@ -94,7 +94,7 @@ export const ColumnFirework: React.FC<ColumnFireworkProps> = ({ isActive, onComp
             backgroundColor: particle.color,
             opacity: particle.opacity,
             transform: 'translate(-50%, -50%)',
-            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+            boxShadow: `0 0 ${particle.size * 3}px ${particle.color}, 0 0 ${particle.size * 5}px ${particle.color}80`,
           }}
         />
       ))}
