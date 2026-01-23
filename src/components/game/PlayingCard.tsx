@@ -82,7 +82,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
             }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
+            <div className="w-6 h-6 portrait:w-5 portrait:h-5 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     <div
       className={cn(
         "relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden",
-        "bg-card card-shadow",
+        "bg-card card-shadow flex flex-col",
         "border border-border/20",
         "transition-all duration-150",
         isValidTarget && "ring-2 ring-gold/70",
@@ -101,26 +101,25 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       )}
       style={style}
     >
+      {/* Top 20% - Always visible header with rank and suit */}
       <div className={cn(
-        "absolute inset-0 p-1.5 sm:p-2 md:p-2.5 flex flex-col",
+        "h-[20%] min-h-[20%] flex items-center justify-center gap-0.5 px-1 portrait:px-0.5 sm:px-1.5 border-b border-border/10",
+        "bg-card",
         isRed ? "text-red-600" : "text-card-foreground"
       )}>
-        {/* Top left rank/suit */}
-        <div className="flex items-center gap-0.5 leading-none">
-          <span className="text-xl sm:text-2xl md:text-3xl font-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
-        </div>
+        <span className="text-base portrait:text-sm sm:text-xl md:text-2xl font-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
+          {rankDisplay}
+        </span>
+        <SuitIcon suit={card.suit} className="w-3.5 h-3.5 portrait:w-3 portrait:h-3 sm:w-5 sm:h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
+      </div>
 
-        {/* Center suit */}
-        <div className="flex-1 flex items-center justify-center">
-          <SuitIcon suit={card.suit} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 opacity-90" />
-        </div>
-
-        {/* Bottom right rank/suit (rotated) */}
-        <div className="flex items-center gap-0.5 leading-none rotate-180">
-          <span className="text-xl sm:text-2xl md:text-3xl font-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
-        </div>
+      {/* Bottom 80% - Can be hidden by next card, shows large suit icon */}
+      <div className={cn(
+        "flex-1 flex items-center justify-center",
+        "bg-card",
+        isRed ? "text-red-600" : "text-card-foreground"
+      )}>
+        <SuitIcon suit={card.suit} className="w-10 h-10 portrait:w-8 portrait:h-8 sm:w-16 sm:h-16 md:w-20 md:h-20 opacity-90" />
       </div>
     </div>
   );

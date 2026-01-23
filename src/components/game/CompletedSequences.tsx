@@ -13,13 +13,13 @@ const SpadeIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 export const CompletedSequences: React.FC<CompletedSequencesProps> = ({ count }) => {
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="flex gap-0.5">
+    <div className="flex flex-col items-center gap-0.5 portrait:gap-0">
+      <div className="flex gap-0.5 portrait:gap-[2px]">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
             className={cn(
-              "w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300",
+              "w-2.5 h-2.5 portrait:w-2 portrait:h-2 sm:w-4 sm:h-4 transition-all duration-300",
               i < count ? "text-gold" : "text-muted-foreground/30",
               i < count && "animate-scale-in",
             )}
@@ -28,7 +28,7 @@ export const CompletedSequences: React.FC<CompletedSequencesProps> = ({ count })
           </div>
         ))}
       </div>
-      <span className="text-xs sm:text-sm text-muted-foreground font-medium">{count}/8</span>
+      <span className="text-[10px] portrait:text-[9px] sm:text-sm text-muted-foreground font-medium">{count}/8</span>
     </div>
   );
 };

@@ -21,12 +21,12 @@ export const StockPile: React.FC<StockPileProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center gap-0.5 portrait:gap-0">
       <button
         onClick={handleClick}
         disabled={!canDeal}
         className={cn(
-          "relative w-12 h-16 sm:w-14 sm:h-20 rounded-lg",
+          "relative w-10 h-14 portrait:w-9 portrait:h-12 sm:w-14 sm:h-20 rounded-lg",
           "transition-all duration-200",
           canDeal && "hover:scale-105 cursor-pointer active:scale-95",
           !canDeal && "cursor-not-allowed opacity-50",
@@ -78,13 +78,13 @@ export const StockPile: React.FC<StockPileProps> = ({
         )}
       </button>
       
-      <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+      <span className="text-[10px] portrait:text-[9px] sm:text-sm text-muted-foreground font-medium">
         {remainingDeals > 0 ? `${remainingDeals} séries` : 'Vide'}
       </span>
 
       {hasEmptyColumn && remainingDeals > 0 && (
-        <span className="text-[10px] sm:text-xs text-accent text-center leading-tight font-medium">
-          Il faut d'abord remplir les colones vides
+        <span className="text-[9px] portrait:text-[8px] sm:text-xs text-accent text-center leading-tight font-medium max-w-[80px] portrait:max-w-[70px]">
+          Remplir colonnes vides
         </span>
       )}
     </div>

@@ -166,12 +166,12 @@ export const SpiderSolitaire: React.FC = () => {
   return (
     <div className="min-h-screen felt-texture flex flex-col select-none">
       {/* Header */}
-      <header className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 border-b border-border/30">
-        <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
-          <h1 className="font-display text-lg sm:text-xl md:text-2xl font-bold text-gold">
+      <header className="flex items-center justify-between px-2 py-1.5 portrait:px-2 portrait:py-1 sm:px-4 sm:py-2.5 md:px-6 md:py-3 border-b border-border/30">
+        <div className="flex items-center gap-1.5 portrait:gap-1 sm:gap-2.5 md:gap-3">
+          <h1 className="font-display text-base portrait:text-sm sm:text-xl md:text-2xl font-bold text-gold">
             Spider Balala
           </h1>
-          <span className="text-xs sm:text-sm text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
+          <span className="text-xs sm:text-sm text-muted-foreground bg-secondary/50 px-1.5 portrait:px-1 py-0.5 rounded">
             {gameState.suitCount} {gameState.suitCount === 1 ? 'couleur' : 'couleurs'}
           </span>
         </div>
@@ -193,8 +193,8 @@ export const SpiderSolitaire: React.FC = () => {
       {/* Game area */}
       <main className="flex-1 relative overflow-hidden">
         {/* Tableau */}
-        <div className="absolute inset-0 p-2 sm:p-3 md:p-4 lg:p-6 pb-24 sm:pb-28 overflow-y-auto">
-          <div className="flex gap-1 sm:gap-1.5 md:gap-2.5 lg:gap-3 h-full">
+        <div className="absolute inset-0 p-1.5 sm:p-2 md:p-4 lg:p-6 pb-20 sm:pb-24 md:pb-28 overflow-x-auto overflow-y-auto portrait:overflow-x-scroll portrait:p-1">
+          <div className="flex gap-1 portrait:gap-0.5 sm:gap-1.5 md:gap-2.5 lg:gap-3 h-full portrait:min-w-max">
             {gameState.tableau.map((cards, index) => (
               <TableauColumn
                 key={index}
@@ -216,8 +216,8 @@ export const SpiderSolitaire: React.FC = () => {
         {/* Bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
           {/* Gradient overlay for smooth transition */}
-          <div className="h-12 bg-gradient-to-t from-background/95 to-transparent" />
-          <div className="bg-background/95 backdrop-blur-sm border-t border-border/30 px-3 sm:px-4 md:px-6 py-3 flex items-end justify-between pointer-events-auto">
+          <div className="h-8 portrait:h-6 sm:h-12 bg-gradient-to-t from-background/95 to-transparent" />
+          <div className="bg-background/95 backdrop-blur-sm border-t border-border/30 px-2 portrait:px-2 sm:px-4 md:px-6 py-2 portrait:py-1.5 sm:py-3 flex items-end justify-between pointer-events-auto">
             <StockPile
               remainingDeals={remainingDeals}
               canDeal={canDeal}

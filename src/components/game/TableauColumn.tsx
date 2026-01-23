@@ -29,55 +29,6 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   onDragStart,
   onFireworkComplete,
 }) => {
-  // Check if card follows the previous card in sequence (same suit, rank - 1)
-  const isInSequence = (cardIndex: number): boolean => {
-    if (cardIndex === 0) return true;
-    const prevCard = cards[cardIndex - 1];
-    const currentCard = cards[cardIndex];
-    
-    if (!prevCard.isFaceUp || !currentCard.isFaceUp) return false;
-    
-    return prevCard.suit === currentCard.suit && prevCard.rank === currentCard.rank + 1;
-  };
-
-  // Check if next card breaks the sequence
-  const nextBreaksSequence = (cardIndex: number): boolean => {
-    if (cardIndex >= cards.length - 1) return false;
-    return !isInSequence(cardIndex + 1);
-  };
-
-  // Adaptive overlap - cards in sequence are grouped, non-sequence cards get extra offset
-  const getCardOverlap = (card: Card, index: number) => {
-    const isFaceUp = card.isFaceUp;
-
-    // Face-down cards get minimal overlap
-    if (!isFaceUp) {
-      return 14;
-    }
-
-    // Base overlap for face-up cards - optimized for better visibility
-    const faceUpCount = cards.filter(c => c.isFaceUp).length;
-    let baseOverlap = 30;
-    if (faceUpCount <= 5) baseOverlap = 40;
-    else if (faceUpCount <= 8) baseOverlap = 35;
-    else if (faceUpCount <= 12) baseOverlap = 32;
-
-    // Add extra offset if this card is NOT in sequence with previous
-    // OR if the next card breaks the sequence (to show last card of series)
-    const needsExtraSpace = !isInSequence(index) || nextBreaksSequence(index);
-
-    return needsExtraSpace ? baseOverlap + 16 : baseOverlap;
-  };
-
-  // Calculate cumulative top position for each card
-  const getCardTop = (cardIndex: number): number => {
-    let top = 0;
-    for (let i = 0; i < cardIndex; i++) {
-      top += getCardOverlap(cards[i], i);
-    }
-    return top;
-  };
-
   const isBeingDragged = (cardIndex: number) => {
     if (dragFromColumn !== columnIndex) return false;
     return dragFromIndex !== null && cardIndex >= dragFromIndex;
@@ -94,17 +45,27 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
 
     e.preventDefault();
     e.stopPropagation();
-    
+
     onDragStart(columnIndex, cardIndex, e.clientX, e.clientY);
   }, [cards, columnIndex, onDragStart]);
 
-  // Calculate total height needed
-  const totalHeight = cards.length > 0 
-    ? getCardTop(cards.length - 1) + 70 
+  // Calculate offset for each card based on face up/down status
+  const getCardOffset = (cardIndex: number): number => {
+    let offset = 0;
+    for (let i = 0; i < cardIndex; i++) {
+      // Face down cards: 5% spacing, Face up cards: 20% spacing (to show header)
+      offset += cards[i].isFaceUp ? 20 : 5;
+    }
+    return offset;
+  };
+
+  // Calculate minimum height needed to show all cards
+  const minHeightPercent = cards.length > 0
+    ? 100 + getCardOffset(cards.length - 1)
     : 0;
 
   return (
-    <div className="relative flex-1 min-w-0 flex flex-col">
+    <div className="relative flex-1 min-w-0 flex flex-col portrait:min-w-[70px] portrait:w-[70px] portrait:px-1.5">
       <div
         data-column={columnIndex}
         className={cn(
@@ -127,28 +88,29 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
             )}
           />
       ) : (
-        <div 
+        <div
           data-column={columnIndex}
-          className="relative touch-none" 
-          style={{ paddingBottom: `${totalHeight}px` }}
+          className="relative touch-none w-full"
+          style={{
+            paddingBottom: `${minHeightPercent * 1.4}%`, // Creates height based on width with aspect ratio
+          }}
         >
           {cards.map((card, index) => {
             const isTop = index === cards.length - 1;
             const dragging = isBeingDragged(index);
-            const top = getCardTop(index);
+            const offsetPercent = getCardOffset(index);
 
             return (
               <div
                 key={card.id}
                 data-column={columnIndex}
                 className={cn(
-                  "absolute left-0 right-0",
+                  "absolute left-0 right-0 top-0",
                   dragging && "opacity-0",
                 )}
                 style={{
-                  top: `${top}px`,
+                  transform: `translateY(${offsetPercent}%)`,
                   zIndex: index,
-                  transition: 'none',
                 }}
                 onPointerDown={(e) => handlePointerDown(e, index)}
               >

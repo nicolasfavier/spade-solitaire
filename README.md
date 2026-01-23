@@ -208,6 +208,12 @@ bubblewrap build
 
 Cela génère un fichier **AAB** (Android App Bundle) prêt pour le Google Play Store.
 
+#### 4. Installation de l'application Android
+
+```bash
+bubblewrap install
+```
+
 ---
 
 ## 🔐 Établir la relation de confiance (Asset Links)

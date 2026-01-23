@@ -97,6 +97,18 @@
     overflow: hidden;
   }
 
+  /* Portrait mode optimizations */
+  @media (orientation: portrait) {
+    body {
+      overflow: hidden;
+    }
+
+    /* Optimize card visibility in portrait mode */
+    .portrait-card-compact {
+      font-size: 0.875rem;
+    }
+  }
+
   h1, h2, h3 {
     font-family: 'Playfair Display', serif;
   }

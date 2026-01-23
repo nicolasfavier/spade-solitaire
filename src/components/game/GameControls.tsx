@@ -26,13 +26,13 @@ export const GameControls: React.FC<GameControlsProps> = ({
 }) => {
   const isDev = import.meta.env.DEV;
   return (
-    <div className="flex items-center gap-2 sm:gap-3">
-      <div className="flex items-center gap-1.5 sm:gap-2">
+    <div className="flex items-center gap-1 portrait:gap-0.5 sm:gap-3">
+      <div className="flex items-center gap-1 portrait:gap-0.5 sm:gap-2">
         <Switch
           id="drop-indicator"
           checked={showDropIndicator}
           onCheckedChange={onToggleDropIndicator}
-          className="scale-75 sm:scale-90"
+          className="scale-[0.65] portrait:scale-[0.6] sm:scale-90"
         />
         <label htmlFor="drop-indicator" className="text-xs sm:text-sm text-muted-foreground hidden sm:inline cursor-pointer">
           Aide
@@ -44,9 +44,9 @@ export const GameControls: React.FC<GameControlsProps> = ({
         size="sm"
         onClick={onJoker}
         disabled={!canJoker}
-        className="gap-1.5"
+        className="gap-1 portrait:gap-0.5 portrait:px-2 portrait:h-7"
       >
-        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+        <Sparkles className="w-3.5 h-3.5 portrait:w-3 portrait:h-3 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">Joker</span>
       </Button>
 
@@ -55,9 +55,9 @@ export const GameControls: React.FC<GameControlsProps> = ({
         size="sm"
         onClick={onUndo}
         disabled={!canUndo}
-        className="gap-1.5"
+        className="gap-1 portrait:gap-0.5 portrait:px-2 portrait:h-7"
       >
-        <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+        <RotateCcw className="w-3.5 h-3.5 portrait:w-3 portrait:h-3 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">Annuler</span>
       </Button>
 
@@ -77,9 +77,9 @@ export const GameControls: React.FC<GameControlsProps> = ({
         variant="gamePrimary"
         size="sm"
         onClick={onNewGame}
-        className="gap-1.5"
+        className="gap-1 portrait:gap-0.5 portrait:px-2 portrait:h-7"
       >
-        <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+        <RefreshCw className="w-3.5 h-3.5 portrait:w-3 portrait:h-3 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">Nouvelle partie</span>
       </Button>
     </div>
