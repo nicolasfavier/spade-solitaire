@@ -28,7 +28,7 @@ export const CompletedSequences: React.FC<CompletedSequencesProps> = ({ count })
           </div>
         ))}
       </div>
-      <span className="text-xs text-muted-foreground">{count}/8</span>
+      <span className="text-xs sm:text-sm text-muted-foreground font-medium">{count}/8</span>
     </div>
   );
 };

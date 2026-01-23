@@ -38,7 +38,7 @@ export const SpiderSolitaire: React.FC = () => {
   const [showDropIndicator, setShowDropIndicator] = useState(() => {
     return localStorage.getItem('spider-show-drop-indicator') !== 'false';
   });
-  const [jokerHint, setJokerHint] = useState<{ fromColumn: number; fromIndex: number; toColumn: number } | null>(null);
+  const [jokerHint, setJokerHint] = useState<{ fromColumn: number; toColumn: number } | null>(null);
 
   const triggerFirework = useCallback((columnIndex: number) => {
     setFireworkColumns(prev => new Set([...prev, columnIndex]));
@@ -151,8 +151,8 @@ export const SpiderSolitaire: React.FC = () => {
     const hint = findInterestingMove();
     if (hint) {
       setJokerHint(hint);
-      // Auto-clear after a short flicker
-      setTimeout(() => setJokerHint(null), 400);
+      // Auto-clear after highlighting
+      setTimeout(() => setJokerHint(null), 1500);
     }
   }, [findInterestingMove]);
 
@@ -165,12 +165,12 @@ export const SpiderSolitaire: React.FC = () => {
   return (
     <div className="min-h-screen felt-texture flex flex-col select-none">
       {/* Header */}
-      <header className="flex items-center justify-between px-3 py-2 md:px-6 md:py-3 border-b border-border/30">
-        <div className="flex items-center gap-2 md:gap-3">
-          <h1 className="font-display text-lg md:text-2xl font-bold text-gold">
+      <header className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5 md:px-6 md:py-3 border-b border-border/30">
+        <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+          <h1 className="font-display text-lg sm:text-xl md:text-2xl font-bold text-gold">
             Spider
           </h1>
-          <span className="text-xs md:text-sm text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
+          <span className="text-xs sm:text-sm text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
             {gameState.suitCount} {gameState.suitCount === 1 ? 'suit' : 'suits'}
           </span>
         </div>
@@ -189,9 +189,9 @@ export const SpiderSolitaire: React.FC = () => {
       </header>
 
       {/* Game area */}
-      <main className="flex-1 flex flex-col p-2 md:p-4 lg:p-6 gap-3 md:gap-4 overflow-hidden">
+      <main className="flex-1 flex flex-col p-2 sm:p-3 md:p-4 lg:p-6 gap-3 sm:gap-3.5 md:gap-4 overflow-hidden">
         {/* Tableau */}
-        <div className="flex-1 flex gap-1 md:gap-2 lg:gap-3 min-h-0 overflow-y-auto">
+        <div className="flex-1 flex gap-1 sm:gap-1.5 md:gap-2.5 lg:gap-3 min-h-0 overflow-y-auto">
           {gameState.tableau.map((cards, index) => (
             <TableauColumn
               key={index}
@@ -202,8 +202,7 @@ export const SpiderSolitaire: React.FC = () => {
               dragFromColumn={dragInfo?.fromColumn ?? null}
               dragFromIndex={dragInfo?.fromIndex ?? null}
               showFirework={fireworkColumns.has(index)}
-              jokerHintFrom={jokerHint?.fromColumn === index ? jokerHint.fromIndex : null}
-              jokerHintTo={jokerHint?.toColumn === index}
+              isJokerHighlighted={jokerHint !== null && (jokerHint.fromColumn === index || jokerHint.toColumn === index)}
               onDragStart={handleDragStart}
               onFireworkComplete={() => handleFireworkComplete(index)}
             />

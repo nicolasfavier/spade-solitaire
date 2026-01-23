@@ -23,19 +23,19 @@ export const GameControls: React.FC<GameControlsProps> = ({
   onToggleDropIndicator,
 }) => {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <Switch
           id="drop-indicator"
           checked={showDropIndicator}
           onCheckedChange={onToggleDropIndicator}
-          className="scale-75"
+          className="scale-75 sm:scale-90"
         />
-        <label htmlFor="drop-indicator" className="text-xs text-muted-foreground hidden sm:inline cursor-pointer">
+        <label htmlFor="drop-indicator" className="text-xs sm:text-sm text-muted-foreground hidden sm:inline cursor-pointer">
           Aide
         </label>
       </div>
-      
+
       <Button
         variant="game"
         size="sm"
@@ -43,10 +43,10 @@ export const GameControls: React.FC<GameControlsProps> = ({
         disabled={!canJoker}
         className="gap-1.5"
       >
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">Joker</span>
       </Button>
-      
+
       <Button
         variant="game"
         size="sm"
@@ -54,17 +54,17 @@ export const GameControls: React.FC<GameControlsProps> = ({
         disabled={!canUndo}
         className="gap-1.5"
       >
-        <RotateCcw className="w-4 h-4" />
+        <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">Undo</span>
       </Button>
-      
+
       <Button
         variant="gamePrimary"
         size="sm"
         onClick={onNewGame}
         className="gap-1.5"
       >
-        <RefreshCw className="w-4 h-4" />
+        <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
         <span className="hidden sm:inline">New Game</span>
       </Button>
     </div>

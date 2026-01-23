@@ -82,7 +82,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
             }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-[hsl(220,70%,45%)] rounded-full opacity-30" />
           </div>
         </div>
       </div>
@@ -102,24 +102,24 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       style={style}
     >
       <div className={cn(
-        "absolute inset-0 p-1.5 md:p-2 flex flex-col",
+        "absolute inset-0 p-1.5 sm:p-2 md:p-2.5 flex flex-col",
         isRed ? "text-red-600" : "text-card-foreground"
       )}>
         {/* Top left rank/suit */}
-        <div className="flex items-center gap-0.5 leading-none bg-card/90 rounded px-0.5">
-          <span className="text-lg md:text-2xl font-black drop-shadow-sm">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 md:w-5 md:h-5" />
+        <div className="flex items-center gap-0.5 leading-none">
+          <span className="text-xl sm:text-2xl md:text-3xl font-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{rankDisplay}</span>
+          <SuitIcon suit={card.suit} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
         </div>
 
         {/* Center suit */}
         <div className="flex-1 flex items-center justify-center">
-          <SuitIcon suit={card.suit} className="w-10 h-10 md:w-14 md:h-14" />
+          <SuitIcon suit={card.suit} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 opacity-90" />
         </div>
 
         {/* Bottom right rank/suit (rotated) */}
-        <div className="flex items-center gap-0.5 leading-none rotate-180 bg-card/90 rounded px-0.5">
-          <span className="text-lg md:text-2xl font-black drop-shadow-sm">{rankDisplay}</span>
-          <SuitIcon suit={card.suit} className="w-4 h-4 md:w-5 md:h-5" />
+        <div className="flex items-center gap-0.5 leading-none rotate-180">
+          <span className="text-xl sm:text-2xl md:text-3xl font-black drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{rankDisplay}</span>
+          <SuitIcon suit={card.suit} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]" />
         </div>
       </div>
     </div>

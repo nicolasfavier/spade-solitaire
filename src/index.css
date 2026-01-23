@@ -203,6 +203,6 @@
 }
 
 .animate-joker-flicker {
-  animation: jokerFlicker 0.4s ease-in-out;
+  animation: jokerFlicker 2s ease-in-out;
 }
 

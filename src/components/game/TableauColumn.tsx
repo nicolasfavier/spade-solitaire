@@ -12,8 +12,7 @@ interface TableauColumnProps {
   dragFromColumn: number | null;
   dragFromIndex: number | null;
   showFirework?: boolean;
-  jokerHintFrom?: number | null;
-  jokerHintTo?: boolean;
+  isJokerHighlighted?: boolean;
   onDragStart: (columnIndex: number, cardIndex: number, clientX: number, clientY: number) => void;
   onFireworkComplete?: () => void;
 }
@@ -26,8 +25,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   dragFromColumn,
   dragFromIndex,
   showFirework = false,
-  jokerHintFrom = null,
-  jokerHintTo = false,
+  isJokerHighlighted = false,
   onDragStart,
   onFireworkComplete,
 }) => {
@@ -51,23 +49,24 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   // Adaptive overlap - cards in sequence are grouped, non-sequence cards get extra offset
   const getCardOverlap = (card: Card, index: number) => {
     const isFaceUp = card.isFaceUp;
-    
+
     // Face-down cards get minimal overlap
     if (!isFaceUp) {
-      return 10;
+      return 14;
     }
-    
-    // Base overlap for face-up cards - larger on tablet
+
+    // Base overlap for face-up cards - optimized for better visibility
     const faceUpCount = cards.filter(c => c.isFaceUp).length;
-    let baseOverlap = 22;
-    if (faceUpCount <= 5) baseOverlap = 28;
-    else if (faceUpCount <= 8) baseOverlap = 25;
-    
+    let baseOverlap = 30;
+    if (faceUpCount <= 5) baseOverlap = 40;
+    else if (faceUpCount <= 8) baseOverlap = 35;
+    else if (faceUpCount <= 12) baseOverlap = 32;
+
     // Add extra offset if this card is NOT in sequence with previous
     // OR if the next card breaks the sequence (to show last card of series)
     const needsExtraSpace = !isInSequence(index) || nextBreaksSequence(index);
-    
-    return needsExtraSpace ? baseOverlap + 12 : baseOverlap;
+
+    return needsExtraSpace ? baseOverlap + 16 : baseOverlap;
   };
 
   // Calculate cumulative top position for each card
@@ -82,10 +81,6 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
   const isBeingDragged = (cardIndex: number) => {
     if (dragFromColumn !== columnIndex) return false;
     return dragFromIndex !== null && cardIndex >= dragFromIndex;
-  };
-
-  const isJokerHighlighted = (cardIndex: number) => {
-    return jokerHintFrom !== null && cardIndex >= jokerHintFrom;
   };
 
   const handleFireworkComplete = useCallback(() => {
@@ -109,28 +104,28 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
     : 0;
 
   return (
-    <div
-      data-column={columnIndex}
-      className={cn(
-        "relative flex-1 min-w-0",
-        "rounded-lg transition-all duration-200",
-        isValidTarget && isDragging && "bg-gold/20 ring-2 ring-gold/50",
-        jokerHintTo && "ring-2 ring-amber-400/80 bg-amber-400/10",
-      )}
-    >
-      <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
-      
-      {cards.length === 0 ? (
-        <div 
-          data-column={columnIndex}
-          className={cn(
-            "aspect-[2.5/3.5] rounded-lg",
-            "border-2 border-dashed border-muted-foreground/30",
-            "bg-muted/10 transition-all",
-            isValidTarget && isDragging && "border-gold bg-gold/10 scale-105",
-            jokerHintTo && "border-amber-400 bg-amber-400/20",
-          )}
-        />
+    <div className="relative flex-1 min-w-0 flex flex-col">
+      <div
+        data-column={columnIndex}
+        className={cn(
+          "relative flex-1 min-w-0",
+          "rounded-lg transition-all duration-200",
+          isValidTarget && isDragging && "bg-gold/20 ring-2 ring-gold/50",
+          isJokerHighlighted && " animate-joker-flicker",
+        )}
+      >
+        <ColumnFirework isActive={showFirework} onComplete={handleFireworkComplete} />
+
+        {cards.length === 0 ? (
+          <div
+            data-column={columnIndex}
+            className={cn(
+              "aspect-[2.5/3.5] rounded-lg",
+              "border-2 border-dashed border-muted-foreground/30",
+              "bg-muted/10 transition-all",
+              isValidTarget && isDragging && "border-gold bg-gold/10 scale-105",
+            )}
+          />
       ) : (
         <div 
           data-column={columnIndex}
@@ -140,7 +135,6 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
           {cards.map((card, index) => {
             const isTop = index === cards.length - 1;
             const dragging = isBeingDragged(index);
-            const jokerHighlight = isJokerHighlighted(index);
             const top = getCardTop(index);
 
             return (
@@ -150,7 +144,6 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
                 className={cn(
                   "absolute left-0 right-0",
                   dragging && "opacity-0",
-                  jokerHighlight && "animate-joker-flicker"
                 )}
                 style={{
                   top: `${top}px`,
@@ -170,6 +163,7 @@ export const TableauColumn: React.FC<TableauColumnProps> = ({
           })}
         </div>
       )}
+      </div>
     </div>
   );
 };

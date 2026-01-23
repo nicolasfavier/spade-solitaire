@@ -307,9 +307,9 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
   const hasEmptyColumn = gameState.tableau.some(col => col.length === 0);
 
   // Find an interesting move suggestion
-  const findInterestingMove = useCallback((): { fromColumn: number; fromIndex: number; toColumn: number } | null => {
+  const findInterestingMove = useCallback((): { fromColumn: number; toColumn: number } | null => {
     const { tableau, suitCount } = gameState;
-    
+
     const candidates: Array<{
       fromColumn: number;
       fromIndex: number;
@@ -327,56 +327,73 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
 
         const cards = column.slice(fromIdx);
         const hasFaceDownBelow = fromIdx > 0 && !column[fromIdx - 1].isFaceUp;
-        
+
+        // Check if card is already well-placed (same suit, correct sequence below it)
+        const isAlreadyWellPlaced = fromIdx > 0 && column[fromIdx - 1].isFaceUp &&
+                                     column[fromIdx - 1].suit === cards[0].suit &&
+                                     column[fromIdx - 1].rank === cards[0].rank + 1;
+
         // Check all possible target columns
         for (let toCol = 0; toCol < COLUMNS; toCol++) {
           if (toCol === fromCol) continue;
-          
+
           const targetColumn = tableau[toCol];
           if (!isValidMove(cards, targetColumn, suitCount)) continue;
 
           // Calculate move score (higher = more interesting)
           let score = 0;
 
-          // Priority 1: Reveals a face-down card
+          // Check if target creates same-suit sequence
+          const targetCreatesSameSuit = targetColumn.length > 0 &&
+                                         targetColumn[targetColumn.length - 1].suit === cards[0].suit;
+
+          // REJECT: Moving a card that's already well-placed to another spot that's not better
+          // Example: 3♠ already under 4♠, don't suggest moving it under another 4♥
+          if (isAlreadyWellPlaced && !targetCreatesSameSuit) {
+            continue;
+          }
+
+          // REJECT: Moving to same situation (e.g., 3 under 4 of different suit -> 3 under another 4 of different suit)
+          if (isAlreadyWellPlaced && targetCreatesSameSuit &&
+              column[fromIdx - 1].rank === targetColumn[targetColumn.length - 1].rank) {
+            continue;
+          }
+
+          // Priority 1: Reveals a face-down card (very important!)
           if (hasFaceDownBelow) {
             score += 100;
           }
 
-          // Priority 2: Builds same-suit sequence (important for multi-suit)
-          if (targetColumn.length > 0) {
-            const targetTop = targetColumn[targetColumn.length - 1];
-            if (targetTop.suit === cards[0].suit) {
-              score += 50;
-            }
-          }
+          // Priority 2: Builds same-suit sequence (essential for completion)
+          if (targetCreatesSameSuit) {
+            score += 60;
 
-          // Priority 3: Moving to empty column with a King is good
-          if (targetColumn.length === 0 && cards[0].rank === 13) {
-            score += 30;
-          }
-
-          // Priority 4: Creates longer sequence
-          if (targetColumn.length > 0) {
-            const targetTop = targetColumn[targetColumn.length - 1];
-            if (targetTop.suit === cards[0].suit) {
-              // Count how long the sequence would become
-              let seqLength = cards.length;
-              for (let i = targetColumn.length - 1; i >= 0; i--) {
-                if (targetColumn[i].suit === cards[0].suit && 
-                    targetColumn[i].rank === cards[0].rank + (targetColumn.length - i)) {
-                  seqLength++;
-                } else {
-                  break;
-                }
+            // Bonus: Count how long the same-suit sequence would become
+            let seqLength = cards.length;
+            for (let i = targetColumn.length - 1; i >= 0; i--) {
+              const card = targetColumn[i];
+              const expectedRank = cards[0].rank + (targetColumn.length - i);
+              if (card.suit === cards[0].suit && card.rank === expectedRank) {
+                seqLength++;
+              } else {
+                break;
               }
-              score += seqLength * 2;
+            }
+            score += seqLength * 3;
+          } else {
+            // Penalty: moving to different suit (unless revealing a card)
+            if (!hasFaceDownBelow) {
+              score -= 20;
             }
           }
 
-          // Skip moves that don't accomplish anything meaningful
-          // (moving a sequence that's already well-placed to another valid spot)
-          if (score === 0) continue;
+          // Priority 3: Moving King to empty column is sometimes useful
+          if (targetColumn.length === 0 && cards[0].rank === 13) {
+            score += hasFaceDownBelow ? 40 : 10;
+          }
+
+          // Skip moves with negative or zero score
+          if (score <= 0) continue;
 
           // Avoid moving to empty column unless it's a King or reveals a card
           if (targetColumn.length === 0 && cards[0].rank !== 13 && !hasFaceDownBelow) {
@@ -390,9 +407,10 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
 
     if (candidates.length === 0) return null;
 
-    // Sort by score and return the best move
+    // Sort by score and return the best move (only return column indices, not card index)
     candidates.sort((a, b) => b.score - a.score);
-    return candidates[0];
+    const best = candidates[0];
+    return { fromColumn: best.fromColumn, toColumn: best.toColumn };
   }, [gameState]);
 
   return {

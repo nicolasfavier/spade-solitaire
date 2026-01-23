@@ -27,7 +27,7 @@ export const VictoryOverlay: React.FC<VictoryOverlayProps> = ({ onPlayAgain }) =
           
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-6">
             <Heart className="w-4 h-4 text-red-500 fill-red-500" />
-            <span className="text-sm">Balala serait fière de toi</span>
+            <span className="text-sm">Bravo Balala ! ❤️</span>
             <Heart className="w-4 h-4 text-red-500 fill-red-500" />
           </div>
           

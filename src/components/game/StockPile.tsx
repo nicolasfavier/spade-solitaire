@@ -78,12 +78,12 @@ export const StockPile: React.FC<StockPileProps> = ({
         )}
       </button>
       
-      <span className="text-xs text-muted-foreground">
+      <span className="text-xs sm:text-sm text-muted-foreground font-medium">
         {remainingDeals > 0 ? `${remainingDeals} deals` : 'Empty'}
       </span>
-      
+
       {hasEmptyColumn && remainingDeals > 0 && (
-        <span className="text-[10px] text-accent text-center leading-tight">
+        <span className="text-[10px] sm:text-xs text-accent text-center leading-tight font-medium">
           Fill empty columns first
         </span>
       )}
