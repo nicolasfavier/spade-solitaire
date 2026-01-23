@@ -413,6 +413,14 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     return { fromColumn: best.fromColumn, toColumn: best.toColumn };
   }, [gameState]);
 
+  const forceWin = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      completedSequences: 8,
+      isWon: true,
+    }));
+  }, []);
+
   return {
     gameState,
     newGame,
@@ -422,6 +430,7 @@ export const useSpiderSolitaire = (initialSuitCount: 1 | 2 | 4 = 1) => {
     canDragFrom,
     getValidDropTargets,
     findInterestingMove,
+    forceWin,
     canUndo: gameState.moves.length > 0,
     canDeal: gameState.stock.length > 0 && !hasEmptyColumn,
     hasEmptyColumn,

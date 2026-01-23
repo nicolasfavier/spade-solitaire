@@ -13,7 +13,7 @@ export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect, onCancel }
       <div className="bg-secondary border border-border rounded-2xl p-6 max-w-sm mx-4 animate-scale-in shadow-2xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-display text-xl font-bold text-gold">
-            New Game
+            Nouvelle partie
           </h2>
           <button 
             onClick={onCancel}
@@ -24,7 +24,7 @@ export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect, onCancel }
         </div>
         
         <p className="text-muted-foreground text-sm mb-5">
-          Choose difficulty level:
+          Quel difficulté aujourd'hui Balala ?
         </p>
         
         <div className="space-y-3">
@@ -34,8 +34,8 @@ export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect, onCancel }
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-semibold text-foreground">1 Suit</span>
-                <p className="text-xs text-muted-foreground mt-0.5">Easy - ♠ only</p>
+                <span className="font-semibold text-foreground">1 Couleur</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Facile</p>
               </div>
               <span className="text-2xl">♠</span>
             </div>
@@ -47,8 +47,8 @@ export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect, onCancel }
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-semibold text-foreground">2 Suits</span>
-                <p className="text-xs text-muted-foreground mt-0.5">Medium - ♠ ♥</p>
+                <span className="font-semibold text-foreground">2 Couleurs</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Moyen</p>
               </div>
               <span className="text-2xl">♠ <span className="text-red-500">♥</span></span>
             </div>
@@ -60,8 +60,8 @@ export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect, onCancel }
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-semibold text-foreground">4 Suits</span>
-                <p className="text-xs text-muted-foreground mt-0.5">Hard - ♠ ♥ ♦ ♣</p>
+                <span className="font-semibold text-foreground">4 Couleurs</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Beaucoup plus difficile !</p>
               </div>
               <span className="text-xl">♠ <span className="text-red-500">♥ ♦</span> ♣</span>
             </div>

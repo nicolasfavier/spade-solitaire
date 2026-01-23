@@ -7,6 +7,7 @@ interface GameControlsProps {
   onNewGame: () => void;
   onUndo: () => void;
   onJoker: () => void;
+  onDebugWin?: () => void;
   canUndo: boolean;
   canJoker: boolean;
   showDropIndicator: boolean;
@@ -17,11 +18,13 @@ export const GameControls: React.FC<GameControlsProps> = ({
   onNewGame,
   onUndo,
   onJoker,
+  onDebugWin,
   canUndo,
   canJoker,
   showDropIndicator,
   onToggleDropIndicator,
 }) => {
+  const isDev = import.meta.env.DEV;
   return (
     <div className="flex items-center gap-2 sm:gap-3">
       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -55,8 +58,20 @@ export const GameControls: React.FC<GameControlsProps> = ({
         className="gap-1.5"
       >
         <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="hidden sm:inline">Undo</span>
+        <span className="hidden sm:inline">Annuler</span>
       </Button>
+
+      {isDev && onDebugWin && (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onDebugWin}
+          className="gap-1.5"
+          title="Debug: Forcer la victoire"
+        >
+          <span>🏆</span>
+        </Button>
+      )}
 
       <Button
         variant="gamePrimary"
@@ -65,7 +80,7 @@ export const GameControls: React.FC<GameControlsProps> = ({
         className="gap-1.5"
       >
         <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span className="hidden sm:inline">New Game</span>
+        <span className="hidden sm:inline">Nouvelle partie</span>
       </Button>
     </div>
   );

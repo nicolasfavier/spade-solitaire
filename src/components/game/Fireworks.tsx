@@ -56,11 +56,11 @@ export const Fireworks: React.FC = () => {
           x: 0,
           y: 0,
           color: COLORS[Math.floor(Math.random() * COLORS.length)],
-          size: 2 + Math.random() * 3,
+          size: 7 + Math.random() * 3,
           angle: (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5,
-          speed: 2 + Math.random() * 3,
+          speed: 3 + Math.random() * 3,
           opacity: 1,
-          decay: 0.015 + Math.random() * 0.01,
+          decay: 0.020 + Math.random() * 0.01,
         });
       }
 
@@ -139,7 +139,7 @@ export const Fireworks: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">
       {fireworks.map(fw => (
         <div
           key={fw.id}
